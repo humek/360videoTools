@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TAppRemap", "TAppRemap.vcxproj", "{427DEACB-2E11-4C57-9971-C796C535D336}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TAppCompare", "TAppCompare.vcxproj", "{80AA9129-9BF4-43BB-B083-E9BA51A4D8AF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{83F2549B-5861-4086-B992-5EC003BAC929} = {83F2549B-5861-4086-B992-5EC003BAC929}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TLibCommon", "TLibCommon.vcxproj", "{83F2549B-5861-4086-B992-5EC003BAC929}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{427DEACB-2E11-4C57-9971-C796C535D336}.Debug|Win32.ActiveCfg = Debug|Win32
+		{427DEACB-2E11-4C57-9971-C796C535D336}.Debug|Win32.Build.0 = Debug|Win32
+		{427DEACB-2E11-4C57-9971-C796C535D336}.Debug|x64.ActiveCfg = Debug|x64
+		{427DEACB-2E11-4C57-9971-C796C535D336}.Debug|x64.Build.0 = Debug|x64
+		{427DEACB-2E11-4C57-9971-C796C535D336}.Release|Win32.ActiveCfg = Release|Win32
+		{427DEACB-2E11-4C57-9971-C796C535D336}.Release|Win32.Build.0 = Release|Win32
+		{427DEACB-2E11-4C57-9971-C796C535D336}.Release|x64.ActiveCfg = Release|x64
+		{427DEACB-2E11-4C57-9971-C796C535D336}.Release|x64.Build.0 = Release|x64
+		{80AA9129-9BF4-43BB-B083-E9BA51A4D8AF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{80AA9129-9BF4-43BB-B083-E9BA51A4D8AF}.Debug|Win32.Build.0 = Debug|Win32
+		{80AA9129-9BF4-43BB-B083-E9BA51A4D8AF}.Debug|x64.ActiveCfg = Debug|x64
+		{80AA9129-9BF4-43BB-B083-E9BA51A4D8AF}.Debug|x64.Build.0 = Debug|x64
+		{80AA9129-9BF4-43BB-B083-E9BA51A4D8AF}.Release|Win32.ActiveCfg = Release|Win32
+		{80AA9129-9BF4-43BB-B083-E9BA51A4D8AF}.Release|Win32.Build.0 = Release|Win32
+		{80AA9129-9BF4-43BB-B083-E9BA51A4D8AF}.Release|x64.ActiveCfg = Release|x64
+		{80AA9129-9BF4-43BB-B083-E9BA51A4D8AF}.Release|x64.Build.0 = Release|x64
+		{83F2549B-5861-4086-B992-5EC003BAC929}.Debug|Win32.ActiveCfg = Debug|Win32
+		{83F2549B-5861-4086-B992-5EC003BAC929}.Debug|Win32.Build.0 = Debug|Win32
+		{83F2549B-5861-4086-B992-5EC003BAC929}.Debug|x64.ActiveCfg = Debug|x64
+		{83F2549B-5861-4086-B992-5EC003BAC929}.Debug|x64.Build.0 = Debug|x64
+		{83F2549B-5861-4086-B992-5EC003BAC929}.Release|Win32.ActiveCfg = Release|Win32
+		{83F2549B-5861-4086-B992-5EC003BAC929}.Release|Win32.Build.0 = Release|Win32
+		{83F2549B-5861-4086-B992-5EC003BAC929}.Release|x64.ActiveCfg = Release|x64
+		{83F2549B-5861-4086-B992-5EC003BAC929}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
