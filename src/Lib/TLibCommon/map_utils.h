@@ -7,15 +7,16 @@
 #define PIBY3 1.0471976f
 #define SIN60 0.8660254f
 
+#define _USE_MATH_DEFINES
 #include <math.h>
-#include "../yuv/yuv_helper.h"
+#include "yuv_helper.h"
 
 // ==============================================================================
 //                               FUNCTION POINTERS
 // ==============================================================================
 typedef void  (*ifilter)   (const image *, const image*, float, float, float *);
-typedef int   (*sph2map)   (int *, float *, float *, const image*, const float *, int);
-typedef int   (*map2sph)   (int,   float,   float,   int, int,       float *);
+typedef int(*sph2map)   (int *, float *, float *, const image*, const float *, int);
+typedef int(*map2sph)   (int, float, float, const image*, int, int, float *);
 typedef float (*aBlendMap) (const float *v);
 
 // ==============================================================================
@@ -62,7 +63,7 @@ const pattern G_CENT_PATTERN = {  1, G_CENT_POINTS};
 //                               INLINE HELPER FUNCTIONS
 // ==============================================================================
 inline float sign(float x){
-    float s = (x > 0) ? 1 : ((x < 0) ? -1 : 0);
+    float s = (x > 0) ? 1.0 : ((x < 0) ? -1.0 : 0.0);
     return s;
 }
 inline float lerp(float a, float b, float k){
@@ -138,6 +139,10 @@ float3 sphToCart(float2 sph);
  * Return: (int) success flag
  */
 int sph2rect(int *f, float* i, float* j, const image* img, const float* v, int b);
+int sph2invrect(int *f, float* i, float* j, const image* img, const float* v, int b);
+int sph2aitoff(int *f, float* i, float* j, const image* img, const float* v, int b);
+int sph2oval(int *f, float* i, float* j, const image* img, const float* v, int b);
+int sph2pole(int *f, float* i, float* j, const image* img, const float* v, int b);
 int sph2eqar(int *f, float *i, float *j, const image* img, const float *v, int b);
 int sph2dyad(int *f, float *i, float *j, const image* img, const float *v, int b);
 int sph2cube(int *f, float *i, float *j, const image* img, const float *v, int b);
@@ -165,18 +170,23 @@ int sph2cos2(int *f, float *i, float *j, const image* img, const float *v, int b
  *         (const float*)  3d point
  * Return: (int) success flag
  */
-int eqar2sph(int f, float i, float j, int h, int w, float *v);
-int rect2sph(int f, float i, float j, int h, int w, float *v);
-int dyad2sph(int f, float i, float j, int h, int w, float *v);
-int merc2sph(int f, float i, float j, int h, int w, float *v);
-int cube2sph(int f, float i, float j, int h, int w, float *v);
-int cos22sph(int f, float i, float j, int h, int w, float *v);
-int view2sph(int f, float i, float j, int h, int w, float *v);
-int trec2sph(int f, float i, float j, int h, int w, float *v);
-int brec2sph(int f, float i, float j, int h, int w, float *v);
-int grid2sph(int f, float i, float j, int h, int w, float *v);
-int beqr2sph(int f, float i, float j, int h, int w, float *v);
-int teqr2sph(int f, float i, float j, int h, int w, float *v);
+int eqar2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int rect2sph(int f, float i, float j, const image* img,int h, int w, float *v);
+int invrect2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int oval2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int pole2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int two2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int aitoff2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int dyad2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int merc2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int cube2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int cos22sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int view2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int trec2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int brec2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int grid2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int beqr2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int teqr2sph(int f, float i, float j, const image* img, int h, int w, float *v);
 
 // ==============================================================================
 //                               INTERPOLATION

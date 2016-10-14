@@ -1,7 +1,8 @@
-#include <getopt.h>
+
 #include "yuv_helper.h"
 #include "map_utils.h"
 #include "panomapper.h"
+#include "getopt.h"
 
 static int usage(const char *exe){
     fprintf(stderr,
@@ -22,15 +23,21 @@ static int usage(const char *exe){
 
 int main(int argc, char **argv){
     // check cmd inputs
-    int c,z=__INT_MAX__;
+    int c,z=INT_MAX;
     bool swFlag = false, mserFlag=false;
+    double AngleX = 0;
+    double AngleY = 0;
+    const char *rotFile = NULL;
     const char *i = NULL, *o=NULL, *f=NULL, *w=NULL, *m=NULL,*n=NULL, *b=NULL,*v=NULL;
-    while ((c = getopt(argc, argv, "i:o:m:n:w:f:z:spv:b:")) != -1){
+    while ((c = getopt(argc, argv, "i:o:c:d:e:m:n:w:f:z:spv:b:")) != -1){
 	switch (c){
 	case 'i': i        = optarg;                    break;
 	case 'o': o        = optarg;                    break;
 	case 'f': f        = optarg;                    break;
 	case 'w': w        = optarg;                    break;
+  case 'c': AngleX = (double)strtof(optarg, 0);                      break;
+  case 'd': AngleY = (double)strtof(optarg, 0);                     break;
+  case 'e': rotFile = optarg;          break;
 	case 's': swFlag   = true;                      break;
 	case 'p': mserFlag = true;                      break;
 	case 'm': m        = optarg;                    break;
@@ -45,8 +52,64 @@ int main(int argc, char **argv){
 	return usage(argv[0]);
 
     sphcomparer sc;
-    sc.init(i,o,f,m,n,z,b,v,w,swFlag,argv[optind],argv[optind+1],argv[optind+2]);
-    double t = sc.sphcomp(mserFlag);
+    sc.init(i,o,f,m,n,z,b,v,w,swFlag,argv[optind],argv[optind+1],argv[optind+2], AngleX, AngleY);
+
+    FILE *fp;
+    std::map<int, std::vector<double>> rotKeyMap;
+    if (rotFile != NULL)
+    {
+      fp = fopen(rotFile, "r");
+      if (fp == 0)
+      {
+        fprintf(stderr, "Error, can not open Rot File \n");
+        return 0;
+      }
+      else
+      {
+        char Line[256];
+        int flagx = 0;
+        int flagy = 0;
+        int poc = 0;
+        double rotx = 0.0;
+        double roty = 0.0;
+
+        while (fgets(Line, sizeof(Line), fp))
+        {
+          std::string strLine(Line);
+          size_t posX = strLine.find("currRotX");
+          size_t posY = strLine.find("currRotY");
+          size_t posPoc = strLine.rfind("POC");
+          if (posX != std::string::npos)
+          {
+            if (flagx != 0)
+            {
+              std::string tmpStr = strLine.substr(posX + 8, std::string::npos);
+              rotx = atof(tmpStr.c_str());
+              flagx = 0;
+            }
+            else flagx = 1;
+          }
+          if (posY != std::string::npos)
+          {
+            if (flagy != 0)
+            {
+              std::string tmpStr = strLine.substr(posY + 8, std::string::npos);
+              roty = atof(tmpStr.c_str());
+              flagy = 0;
+            }
+            else flagy = 1;
+          }
+          if (posPoc != std::string::npos)
+          {
+            std::vector<double> vecTmp = { rotx, roty };
+            poc = atoi(strLine.c_str() + 3);
+            rotKeyMap.insert(std::map<int, std::vector<double>>::value_type(poc, vecTmp));
+          }
+        }
+      }
+    }
+
+    double t = sc.sphcomp(rotKeyMap, mserFlag);
     printf("PSNR: %.15f\n",t);
 
     return 0;

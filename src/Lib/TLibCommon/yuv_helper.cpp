@@ -1,4 +1,5 @@
 #include "yuv_helper.h"
+#include <algorithm>
 
 /* init
  * ------------------------------------
@@ -39,7 +40,7 @@ std::string cYuv::toNthYuv(const char* fbase, int n){
 
     s.resize(idx);
     char buf[10];
-    sprintf(buf,"-%03d.yuv",n);
+    sprintf_s(buf,"-%03d.yuv",n);
     s+= std::string(buf);
     return s;
 }
@@ -54,7 +55,7 @@ void cYuv::yuvFileOpen(const char* fname, int n, bool readFlag){
 	if(readFlag)
 	    m_pFiles.push_back(fopen(fname,"rb"));
 	else
-	    m_pFiles.push_back(fopen(fname,"w+"));
+	    m_pFiles.push_back(fopen(fname,"wb+"));
 	if(m_pFiles[0] == NULL)
 	    fputs ("File read error\n", stderr);
     }
@@ -85,7 +86,7 @@ void cYuv::setDimensions(image* img, std::vector<int> ws, std::vector<int>hs, fl
  * ------------------------------------
  * Descrp: initializes the yuv reader
  */
-void cYuvReader::init(const char *fname, std::vector<int> ws, std::vector<int> hs, int n, bool mFlag)
+void cYuvReader::init(const char *fname, std::vector<int> ws, std::vector<int> hs, int n, bool mFlag,double AngleX, double AngleY)
 {
     // set parameters
     multFlag = mFlag;
@@ -100,9 +101,9 @@ void cYuvReader::init(const char *fname, std::vector<int> ws, std::vector<int> h
 
     // alloc memory
     if ( n == 1 || multFlag){
-        m_pY = img_alloc(  w,  h,n);
-        m_pU = img_alloc(w/2,h/2,n);
-        m_pV = img_alloc(w/2,h/2,n);
+        m_pY = img_alloc(  w,  h,n, AngleX, AngleY);
+        m_pU = img_alloc(w/2,h/2,n, AngleX, AngleY);
+        m_pV = img_alloc(w/2,h/2,n, AngleX, AngleY);
     }
     // cube special case
     else if ( n == 6 ) {
@@ -221,13 +222,14 @@ bool cYuvWriter::writeNextFrame(bool color)
     if (color)
     {
         image *Y = getY();
-        for(int f=0; f<m_F; f++)
-            for(int i=0; i<Y->w*Y->h; i++)
-                fprintf(m_pFiles[0],"%c",(unsigned int)(Y[f].p[i]*255 + 0.499));
+        for (int f = 0; f < m_F; f++)
+          for (int i = 0; i<Y->w*Y->h; i++)
+            fprintf(m_pFiles[0], "%c", (unsigned int)(Y[f].p[i] * 255 + 0.499));
 
-        image *U = getU();
-        for(int f=0; f<m_F; f++)
-            for(int i=0; i<U->w*U->h; i++)
+
+          image *U = getU();
+          for (int f = 0; f < m_F; f++)
+          for (int i = 0; i < U->w*U->h; i++)
                 fprintf(m_pFiles[0],"%c",(unsigned int)(U[f].p[i]*255 + 0.499));
 
         image *V = getV();
@@ -289,7 +291,7 @@ void cYuvReader::buffer2Img(image* img, uint8_t* bufferIn, int w, int h, int off
  * Inputs:
  * Return:
  */
-image* cYuv::img_alloc(int w, int h, int n)
+image* cYuv::img_alloc(int w, int h, int n, double AngleX, double AngleY)
 {
     image* img = 0;
     img = (image *) calloc(n, sizeof (image));
@@ -301,6 +303,8 @@ image* cYuv::img_alloc(int w, int h, int n)
         img[i].c = 1;
         img[i].b = 0;
         img[i].s = 0;
+        img[i].AngleX = AngleX;
+        img[i].AngleY = AngleY;
     }
     return img;
 }
