@@ -1,8 +1,7 @@
-
+#include "getopt.h"
 #include "yuv_helper.h"
 #include "map_utils.h"
 #include "panomapper.h"
-#include "getopt.h"
 
 static int usage(const char *exe){
     fprintf(stderr,
