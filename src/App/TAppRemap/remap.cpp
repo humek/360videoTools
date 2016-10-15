@@ -1,4 +1,4 @@
-#include <getopt.h>
+#include "getopt.h"
 #include "yuv_helper.h"
 #include "map_utils.h"
 #include "panomapper.h"
@@ -28,7 +28,7 @@ static int usage(const char *exe){
 
 int main(int argc, char **argv){
     // check command line inputs
-    int c,n=500,z=__INT_MAX__,v=-1;
+    int c,n=500,z=INT_MAX,v=-1;
     float x=90.,y=90.,w=200,h=200;
     float p=0.,l=0.;
     bool  blendFlag = false;

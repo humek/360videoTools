@@ -7,8 +7,9 @@
 #define PIBY3 1.0471976f
 #define SIN60 0.8660254f
 
+#define _USE_MATH_DEFINES
 #include <math.h>
-#include "../yuv/yuv_helper.h"
+#include "yuv_helper.h"
 
 // ==============================================================================
 //                               FUNCTION POINTERS

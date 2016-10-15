@@ -54,7 +54,7 @@ void cYuv::yuvFileOpen(const char* fname, int n, bool readFlag){
 	if(readFlag)
 	    m_pFiles.push_back(fopen(fname,"rb"));
 	else
-	    m_pFiles.push_back(fopen(fname,"w+"));
+	    m_pFiles.push_back(fopen(fname,"wb+"));
 	if(m_pFiles[0] == NULL)
 	    fputs ("File read error\n", stderr);
     }

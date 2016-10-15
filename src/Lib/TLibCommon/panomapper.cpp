@@ -426,11 +426,10 @@ void remapper::antialiasFilter(){
     
     // get antialias filter
     cv::Mat dstY,dstU,dstV;
-    int nTaps = 9;
-    float hx[nTaps];
-    float hy[nTaps];
-    getAntialiasFilter(nTaps,fx,hx);
-    getAntialiasFilter(nTaps,fy,hy);
+    float hx[9];
+    float hy[9];
+    getAntialiasFilter(9,fx,hx);
+    getAntialiasFilter(9,fy,hy);
 
     // perform antiliasing
     cv::Mat hxm = cv::Mat(1,9,CV_32F,hx);

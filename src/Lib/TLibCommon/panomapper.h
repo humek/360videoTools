@@ -1,7 +1,7 @@
 #ifndef _PANOMAPPER_H_
 #define _PANOMAPPER_H_
 
-#include "../map_utils/map_utils.h"
+#include "map_utils.h"
 #include <opencv2/opencv.hpp>
 
 // antialias filter lookups

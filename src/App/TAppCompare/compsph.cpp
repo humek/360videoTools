@@ -1,4 +1,4 @@
-#include <getopt.h>
+#include "getopt.h"
 #include "yuv_helper.h"
 #include "map_utils.h"
 #include "panomapper.h"
@@ -22,7 +22,7 @@ static int usage(const char *exe){
 
 int main(int argc, char **argv){
     // check cmd inputs
-    int c,z=__INT_MAX__;
+    int c,z=INT_MAX;
     bool swFlag = false, mserFlag=false;
     const char *i = NULL, *o=NULL, *f=NULL, *w=NULL, *m=NULL,*n=NULL, *b=NULL,*v=NULL;
     while ((c = getopt(argc, argv, "i:o:m:n:w:f:z:spv:b:")) != -1){

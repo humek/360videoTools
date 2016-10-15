@@ -38,6 +38,9 @@ float latLUTLookup(float x){
     x = x*PI/180.0f;
     float step = PI/(G_LAT_NUMPTS_LUT-1);
     float idx = (x+PIBY2)/step;
+#if 1// whu lym change
+    idx = idx < 0 ? 0 : idx;
+#endif
     int lowidx = (int)floor(idx);
     int higidx = (int)ceil(idx);
     if(lowidx==higidx)
