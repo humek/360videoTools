@@ -336,7 +336,7 @@ int sph2invrect(int* f, float* i, float* j, const image* img, const float* v, in
   return 1;
 }
 
-int sph2oval(int* f, float* i, float* j, const image* img, const float* v, int b){
+int sph2sanson(int* f, float* i, float* j, const image* img, const float* v, int b){
   int w = img->w;
   int h = img->h;
 
@@ -1122,7 +1122,7 @@ int two2sph(int f, float i, float j, const image* img, int h, int w, float *v){
 
 
 }
-int oval2sph(int f, float i, float j, const image* img, int h, int w, float *v){
+int sanson2sph(int f, float i, float j, const image* img, int h, int w, float *v){
   const float lat = PIBY2 - PI * i / (w / 2);
   const float lon = (j - (w / 2)) / (w / 2 * cos(lat)) * PI;
 
@@ -1307,7 +1307,7 @@ void filter_nearest(const image *img, const image *acs, float i, float j, float 
      float ii = clamp(i - 0.5f, 0.0f, img->h - 1.0f);
      float jj = clamp(j - 0.5f, 0.0f, img->w - 1.0f);
 
-    if (img->isAtoiff == 1)
+    if (img->isSpatialFilterBound == 1)
     {
       double boundx;
       if (ii > img->h / 2)
@@ -1320,7 +1320,7 @@ void filter_nearest(const image *img, const image *acs, float i, float j, float 
       }
       jj = clamp(jj, ceilf(img->w / 2 - boundx), floorf(img->w / 2 + boundx));
     }
-    if (img->isAtoiff == 2)
+    if (img->isSpatialFilterBound == 2)
     {
       double boundx;
       double tmpPhi = ii > img->h / 2 ? PIBY2 - PI * ceilf(ii+1) / (img->w / 2) : PIBY2 - PI * floor(ii) / (img->w / 2);
@@ -1348,18 +1348,8 @@ void filter_linear(const image *img, const image *acs, float i, float j, float *
     float jj = clamp(j - 0.5f, 0.0f, img->w - 1.0f);
 
 
-
-    //double ovalCheck = 0;
-    //if (img->isAtoiff == 1)
-    //{
-    //  ovalCheck = pow(abs((jj - img->w / 2)) + 2, 2.0) / pow(img->w / 2, 2.0) + pow(abs((ii - img->h / 2)) + 2, 2.0) / pow(img->h / 2, 2.0);
-
-    //  double boundx = abs(sqrt(1.0 - pow((ii - img->h / 2), 2.0) / pow(img->h / 2, 2.0)) * img->w / 2);
-    //  jj = clamp(jj, img->w / 2 - boundx, img->w / 2 + boundx);
-    //}
-
-      long  i0 = lrintf(floorf(ii)), i1 = lrintf(ceilf(ii));
-      long  j0 = lrintf(floorf(jj)), j1 = lrintf(ceilf(jj));
+    long  i0 = lrintf(floorf(ii)), i1 = lrintf(ceilf(ii));
+    long  j0 = lrintf(floorf(jj)), j1 = lrintf(ceilf(jj));
 
     const float di = ii - i0;
     const float dj = jj - j0;
@@ -1393,20 +1383,20 @@ void filter_bicubic(const image *img, const image *acs, float i, float j, float 
     const int col_LB = 1;
     const int col_HB = img->h-2;
 
-    double AtoiffCheck = 0;
-    double OvalCheck = 0;
-    if (img->isAtoiff == 1)
+    double AitoffCheck = 0;
+    double SansonCheck = 0;
+    if (img->isSpatialFilterBound == 1)
     {
-      AtoiffCheck = pow(abs((j + 0.5 - img->w / 2)) + 2, 2.0) / pow(img->w / 2, 2.0) + pow(abs((i + 0.5 - img->h / 2)) + 2, 2.0) / pow(img->h / 2, 2.0);
+      AitoffCheck = pow(abs((j + 0.5 - img->w / 2)) + 2, 2.0) / pow(img->w / 2, 2.0) + pow(abs((i + 0.5 - img->h / 2)) + 2, 2.0) / pow(img->h / 2, 2.0);
     }
-    if (img->isAtoiff == 2)
+    if (img->isSpatialFilterBound == 2)
     {
       double tmpPhi = i > img->h / 2 ? PIBY2 - PI * (i + 2) / (img->w / 2) : PIBY2 - PI * (i - 2) / (img->w / 2);
       double tmptheta = (abs(j - (img->w / 2)) + 2 )/ (img->w / 2 * cos(tmpPhi)) * PI;
-      OvalCheck = tmptheta;
+      SansonCheck = tmptheta;
     }
   
-    if (AtoiffCheck >= 1 || OvalCheck > PI)
+    if (AitoffCheck >= 1 || SansonCheck > PI)
     {
       filter_nearest(img, acs, i + 0.5, j + 0.5, p);
       return;

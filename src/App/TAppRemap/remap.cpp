@@ -11,7 +11,7 @@ static int usage(const char *exe){
       "%s [-i input] [-o output] [-f filter] [-m m] [-n n] [-w w] [-h h] [-t tf] [-y] src dst\n"
       " \n"
       "\t-i ... Input  file type, common: rect  eqar  cube                [rect]\n"
-      "\t       added: invrect(used for invRot)  aitoff, oval(used for mapping)  pole(used to get pole 1024,need check) \n"
+      "\t       added: invrect(used for invRot)  aitoff, sanson(used for mapping)  pole(used to get pole 1024,need check) \n"
       "\t       not used: dyad, mult, bmul, trec, brec, grid, beqr, teqr, merc, cos2 \n"
       "\t-o ... Output file type: cube, rect, eqar, merc, view             [rect]\n"
       "\t-f ... Filter type: nearest, linear, bicubic                   [bicubic]\n"

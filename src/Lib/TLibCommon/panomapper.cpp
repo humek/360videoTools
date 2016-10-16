@@ -35,8 +35,8 @@ sph2map panomapper::charToSph2Map(const char* s2m){
     return sph2invrect;
   else if (!strcmp(s2m, "aitoff"))
     return sph2aitoff;
-  else if (!strcmp(s2m, "oval"))
-    return sph2oval;
+  else if (!strcmp(s2m, "sanson"))
+    return sph2sanson;
   else if (!strcmp(s2m, "pole"))
     return sph2pole;
 	else if(!strcmp(s2m,"eqar"))
@@ -84,8 +84,8 @@ map2sph panomapper::charToMap2Sph(const char* m2s){
         return invrect2sph;
       else if (!strcmp(m2s, "aitoff"))
         return aitoff2sph;
-      else if (!strcmp(m2s, "oval"))
-        return oval2sph;
+      else if (!strcmp(m2s, "sanson"))
+        return sanson2sph;
       else if (!strcmp(m2s, "pole"))
         return pole2sph;
       else if (!strcmp(m2s, "two"))
@@ -493,7 +493,6 @@ void remapper::antialiasFilter(){
     
     // get antialias filter
     cv::Mat dstY,dstU,dstV;
-    int nTaps = 9;
     float hx[9];
     float hy[9];
     getAntialiasFilter(9,fx,hx);
@@ -573,30 +572,14 @@ void remapper::supersample(const image *src, const image *dst, const image *acs,
           if (sph2src == sph2aitoff)
           {
             image* p = const_cast<image*>(src);
-            p->isAtoiff = 1;
+            p->isSpatialFilterBound = 1;
           }
-          if (sph2src == sph2oval)
+          if (sph2src == sph2sanson)
           {
             image* p = const_cast<image*>(src);
-            p->isAtoiff = 2;
+            p->isSpatialFilterBound = 2;
           }
-          if (v[0] == 0 && v[1] == 0 && v[2] == 0 && dst->w == 4096)
-          {
-            p[0] = 0.0627;
-          }
-          else if (v[0] == 0 && v[1] == 0 && v[2] == 0)
-          {
-            p[0] = 0.50196;
-          }
-          //else if (v[0] == 0 && v[1] == 0 && v[2] == 0 && dst->w == 4096 && ii > dst->h / 2)
-          //{
-          //  p[0] = 0.067;
-          //}
-          //else if (v[0] == 0 && v[1] == 0 && v[2] == 0 && ii > dst->h / 2)
-          //{
-          //    p[0] = 0.502;
-          //}
-          else if (v[0] == 0 && v[1] == 0 && v[2] == 0)
+          if (v[0] == 0 && v[1] == 0 && v[2] == 0)
           {
               p[0] = 0;
           }
@@ -797,50 +780,48 @@ double sphcomparer::sphcomp(std::map<int, std::vector<double>> rotMap, bool mser
     int nf = 0;
     float ps = 0;
     double storeX, storeY;
-    while(nf<m_numFrames){
-
-
-	bool sr1Flag = sr1Yuv.readNextFrame();
-	bool sr2Flag = sr2Yuv.readNextFrame();
-	
-	if (sr1Flag && !sr2Flag)
-	    fprintf(stderr,"Src1 file longer than src2");
-	else if(!sr1Flag && sr2Flag)
-	    fprintf(stderr,"Src2 file longer than src1");
-	if(!sr1Flag || !sr2Flag)
-	    break;
-
-	nf++;
-	printf("Frame: %d\r",nf); fflush(stdout);
-
-  if (rotMap.size() != 0)
-  {
-    std::map<int, std::vector<double>>::iterator it = rotMap.find(nf - 1);
-    storeX = sr1Yuv.getY()->AngleX;
-    storeY = sr1Yuv.getY()->AngleY;
-    if (it != rotMap.end())
+    while(nf<m_numFrames)
     {
-      sr1Yuv.getY()->AngleX = it->second[0];
-      sr1Yuv.getY()->AngleY = it->second[1];
-      sr1Yuv.getU()->AngleX = it->second[0];
-      sr1Yuv.getU()->AngleY = it->second[1];
-      sr1Yuv.getV()->AngleX = it->second[0];
-      sr1Yuv.getV()->AngleY = it->second[1];
-    }
+	      bool sr1Flag = sr1Yuv.readNextFrame();
+	      bool sr2Flag = sr2Yuv.readNextFrame();
+	
+	      if (sr1Flag && !sr2Flag)
+	          fprintf(stderr,"Src1 file longer than src2");
+	      else if(!sr1Flag && sr2Flag)
+	          fprintf(stderr,"Src2 file longer than src1");
+	      if(!sr1Flag || !sr2Flag)
+	          break;
 
-  }
-	sph1 = genSphFromImg(sr1Yuv.getY(), sph2sr1);
-	sph2 = genSphFromImg(sr2Yuv.getY(), sph2sr2);
-  ps += compareTwoSph(sr2Yuv.getY(), mserFlag);
-  if (rotMap.size() != 0)
-  {
-    sr1Yuv.getY()->AngleX = storeX;
-    sr1Yuv.getY()->AngleY = storeY;
-    sr1Yuv.getU()->AngleX = storeX;
-    sr1Yuv.getU()->AngleY = storeY;
-    sr1Yuv.getV()->AngleX = storeX;
-    sr1Yuv.getV()->AngleY = storeY;
-  }
+	      nf++;
+	      printf("Frame: %d\r",nf); fflush(stdout);
+
+        if (rotMap.size() != 0)
+        {
+          std::map<int, std::vector<double>>::iterator it = rotMap.find(nf - 1);
+          storeX = sr1Yuv.getY()->AngleX;
+          storeY = sr1Yuv.getY()->AngleY;
+          if (it != rotMap.end())
+          {
+            sr1Yuv.getY()->AngleX = it->second[0];
+            sr1Yuv.getY()->AngleY = it->second[1];
+            sr1Yuv.getU()->AngleX = it->second[0];
+            sr1Yuv.getU()->AngleY = it->second[1];
+            sr1Yuv.getV()->AngleX = it->second[0];
+            sr1Yuv.getV()->AngleY = it->second[1];
+          }
+        }
+	      sph1 = genSphFromImg(sr1Yuv.getY(), sph2sr1);
+	      sph2 = genSphFromImg(sr2Yuv.getY(), sph2sr2);
+        ps += compareTwoSph(sr2Yuv.getY(), mserFlag);
+        if (rotMap.size() != 0)
+        {
+          sr1Yuv.getY()->AngleX = storeX;
+          sr1Yuv.getY()->AngleY = storeY;
+          sr1Yuv.getU()->AngleX = storeX;
+          sr1Yuv.getU()->AngleY = storeY;
+          sr1Yuv.getV()->AngleX = storeX;
+          sr1Yuv.getV()->AngleY = storeY;
+        }
     }
     printf("nf: %d\n",nf);
     return ps/nf;

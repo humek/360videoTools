@@ -17,7 +17,7 @@ struct image
     int    c;  // sample count
     int    b;  // sample depth
     int    s;  // sample format
-    int    isAtoiff;
+    int    isSpatialFilterBound;   //1 for Aitoff Projection; 2 for Sanson Projection
     double AngleX;
     double AngleY;
 };
