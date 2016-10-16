@@ -28,10 +28,12 @@ static int usage(const char *exe){
       "\t-t ... Tracking data file                                         [none]\n"
       "\t-y ... Blend data together (only works with orec, etc ...)         [off]\n"
       "\t-z ... Number of frames                                            [MAX]\n"
-      "\t-c ... rotation of x                                                       [0]"
-      "\t-d ... rotation of y                                                       [0]"
-      "\t-e ... file describe rotation                                         "
-      "\\E.g. (map.exe -i rect -o rect -m 2048 -b 4096 -n 1024 -v 2048 -z 1 D:\\lym\\Sequence\\VR\\Hangpai_3_107Frame.yuv d:\\rot.yuv -c 0 -d 0 -e d:\\lowdelay_log.txt) \n",
+      "\t-c ... rotation of x                                                       [0]\n"
+      "\t-d ... rotation of y                                                       [0]\n"
+      "\t-e ... file describe rotation                                         \n"
+      "\t-g ... is first frame rotate                                           [0]\n"
+      "\t-u ... is inv rotate  mapping                                       [0]\n"
+      "\\E.g. (map.exe -i rect -o rect -m 2048 -b 4096 -n 1024 -v 2048 -z 10 InputFile.yuv OutputFile.yuv [-c 0.5 -d 1.0] [-e d:\\lowdelay_log.txt] [-g 1] [-u 1]) \n",
             exe);
     return 0;
 }
@@ -49,6 +51,8 @@ int main(int argc, char **argv){
 
     double AngleX = 0.0;
     double AngleY = 0.0;
+    int isFirstFrameRot = 0;
+    int isInvRotMapping = 0;
 
     const char *rotFile = NULL;
     const char *inputType = NULL;
@@ -59,7 +63,7 @@ int main(int argc, char **argv){
     const char *m = NULL;
     const char *b = NULL;
 
-    while ((argNum = getopt(argc, argv, "i:o:m:n:z:t:x:y:w:h:f:a:b:v:p:l:c:d:e:r")) != -1)
+    while ((argNum = getopt(argc, argv, "i:o:m:n:z:t:x:y:w:h:f:a:b:v:p:l:c:d:e:g:u:r")) != -1)
     {
         switch (argNum){
               case 'i': inputType = optarg;                      break;                    //input file type
@@ -81,6 +85,8 @@ int main(int argc, char **argv){
               case 'c': AngleX = (double)strtod(optarg, 0);                      break;     //about rotation
               case 'd': AngleY = (double)strtod(optarg, 0);                     break;
               case 'e': rotFile = optarg;          break;
+              case 'g': isFirstFrameRot = (int)strtol(optarg, 0, 0);          break;     //is first frame rotate, 0 for no, 1 for yep
+              case 'u': isInvRotMapping = (int)strtol(optarg, 0, 0);          break;     //is inv rotate mapping, 0 for no, 1 for yep
 	            case 'r': blendFlag = true;                break;        //????
         default : return usage(argv[0]);
         }
@@ -96,7 +102,7 @@ int main(int argc, char **argv){
       FrameNum, b, v,   
       p, l,       //view port use
       t, a, argv[optind], argv[optind + 1], //inputFile and outputFile
-      AngleX, AngleY);
+      AngleX, AngleY, isInvRotMapping);
 
     FILE *fp;
     std::map<int, std::vector<double>> rotKeyMap;
@@ -153,7 +159,7 @@ int main(int argc, char **argv){
       }
     }
 
-    PanoMapper.remapFrames(rotKeyMap);
+    PanoMapper.remapFrames(rotKeyMap, isFirstFrameRot);
 
     // map all frames
     return 0;

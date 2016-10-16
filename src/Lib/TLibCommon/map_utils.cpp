@@ -262,28 +262,49 @@ int sph2rect(int* f, float* i, float* j, const image* img, const float* v, int b
 
     float x, y, z;
     x = v[0]; y = v[1]; z = v[2];
-    
-    double AngleX = img->AngleX;
-    double AngleY = img->AngleY;
-
-    double b11 = cos(AngleX);
-    double b12 = 0;
-    double b13 = -sin(AngleX);
-    double b21 = -sin(AngleY)*sin(AngleX);
-    double b22 = cos(AngleY);
-    double b23 = -cos(AngleX)*sin(AngleY);
-    double b31 = cos(AngleY)*sin(AngleX);
-    double b32 = sin(AngleY);
-    double b33 = cos(AngleY)*cos(AngleX);
-
-    double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
-
-
     double currPelXYZ[3];
-
-    for (int i = 0; i < 3; i++)
+    if (img->invRotFlag)
     {
-      currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+      double AngleX = -img->AngleX;
+      double AngleY = -img->AngleY;
+
+      double b11 = cos(AngleX);
+      double b12 = -sin(AngleY)*sin(AngleX);
+      double b13 = -cos(AngleY)*sin(AngleX);
+      double b21 = 0;
+      double b22 = cos(AngleY);
+      double b23 = -sin(AngleY);
+      double b31 = sin(AngleX);
+      double b32 = cos(AngleX)*sin(AngleY);
+      double b33 = cos(AngleY)*cos(AngleX);
+
+      double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
+
+      for (int i = 0; i < 3; i++)
+      {
+        currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+      }
+    }
+    else
+    {
+      double AngleX = img->AngleX;
+      double AngleY = img->AngleY;
+      double b11 = cos(AngleX);
+      double b12 = 0;
+      double b13 = -sin(AngleX);
+      double b21 = -sin(AngleY)*sin(AngleX);
+      double b22 = cos(AngleY);
+      double b23 = -cos(AngleX)*sin(AngleY);
+      double b31 = cos(AngleY)*sin(AngleX);
+      double b32 = sin(AngleY);
+      double b33 = cos(AngleY)*cos(AngleX);
+
+      double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
+
+      for (int i = 0; i < 3; i++)
+      {
+        currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+      }
     }
 
     float phi = acosf(currPelXYZ[1]);
@@ -342,30 +363,50 @@ int sph2sanson(int* f, float* i, float* j, const image* img, const float* v, int
 
   float x, y, z;
   x = v[0]; y = v[1]; z = v[2];
-
-  double AngleX = img->AngleX;
-  double AngleY = img->AngleY;
-
-  double b11 = cos(AngleX);
-  double b12 = 0;
-  double b13 = -sin(AngleX);
-  double b21 = -sin(AngleY)*sin(AngleX);
-  double b22 = cos(AngleY);
-  double b23 = -cos(AngleX)*sin(AngleY);
-  double b31 = cos(AngleY)*sin(AngleX);
-  double b32 = sin(AngleY);
-  double b33 = cos(AngleY)*cos(AngleX);
-
-  double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
-
-
   double currPelXYZ[3];
-
-  for (int i = 0; i < 3; i++)
+  if (img->invRotFlag)
   {
-    currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
-  }
+    double AngleX = -img->AngleX;
+    double AngleY = -img->AngleY;
 
+    double b11 = cos(AngleX);
+    double b12 = -sin(AngleY)*sin(AngleX);
+    double b13 = -cos(AngleY)*sin(AngleX);
+    double b21 = 0;
+    double b22 = cos(AngleY);
+    double b23 = -sin(AngleY);
+    double b31 = sin(AngleX);
+    double b32 = cos(AngleX)*sin(AngleY);
+    double b33 = cos(AngleY)*cos(AngleX);
+
+    double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
+
+    for (int i = 0; i < 3; i++)
+    {
+      currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+    }
+  }
+  else
+  {
+    double AngleX = img->AngleX;
+    double AngleY = img->AngleY;
+    double b11 = cos(AngleX);
+    double b12 = 0;
+    double b13 = -sin(AngleX);
+    double b21 = -sin(AngleY)*sin(AngleX);
+    double b22 = cos(AngleY);
+    double b23 = -cos(AngleX)*sin(AngleY);
+    double b31 = cos(AngleY)*sin(AngleX);
+    double b32 = sin(AngleY);
+    double b33 = cos(AngleY)*cos(AngleX);
+
+    double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
+
+    for (int i = 0; i < 3; i++)
+    {
+      currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+    }
+  }
   float phi = acosf(currPelXYZ[1]);
   float theta = atan2f(currPelXYZ[2], currPelXYZ[0]);
   double xxx = theta *(w / 2 * sin(phi)) / PI;
@@ -381,30 +422,50 @@ int sph2aitoff(int* f, float* i, float* j, const image* img, const float* v, int
 
   float x, y, z;
   x = v[0]; y = v[1]; z = v[2];
-
-  double AngleX = img->AngleX;
-  double AngleY = img->AngleY;
-
-  double b11 = cos(AngleX);
-  double b12 = 0;
-  double b13 = -sin(AngleX);
-  double b21 = -sin(AngleY)*sin(AngleX);
-  double b22 = cos(AngleY);
-  double b23 = -cos(AngleX)*sin(AngleY);
-  double b31 = cos(AngleY)*sin(AngleX);
-  double b32 = sin(AngleY);
-  double b33 = cos(AngleY)*cos(AngleX);
-
-  double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
-
-
   double currPelXYZ[3];
-
-  for (int i = 0; i < 3; i++)
+  if (img->invRotFlag)
   {
-    currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
-  }
+    double AngleX = -img->AngleX;
+    double AngleY = -img->AngleY;
 
+    double b11 = cos(AngleX);
+    double b12 = -sin(AngleY)*sin(AngleX);
+    double b13 = -cos(AngleY)*sin(AngleX);
+    double b21 = 0;
+    double b22 = cos(AngleY);
+    double b23 = -sin(AngleY);
+    double b31 = sin(AngleX);
+    double b32 = cos(AngleX)*sin(AngleY);
+    double b33 = cos(AngleY)*cos(AngleX);
+
+    double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
+
+    for (int i = 0; i < 3; i++)
+    {
+      currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+    }
+  }
+  else
+  {
+    double AngleX = img->AngleX;
+    double AngleY = img->AngleY;
+    double b11 = cos(AngleX);
+    double b12 = 0;
+    double b13 = -sin(AngleX);
+    double b21 = -sin(AngleY)*sin(AngleX);
+    double b22 = cos(AngleY);
+    double b23 = -cos(AngleX)*sin(AngleY);
+    double b31 = cos(AngleY)*sin(AngleX);
+    double b32 = sin(AngleY);
+    double b33 = cos(AngleY)*cos(AngleX);
+
+    double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
+
+    for (int i = 0; i < 3; i++)
+    {
+      currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+    }
+  }
   float phi = PI / 2 - acosf(currPelXYZ[1]);
   float theta = atan2f(currPelXYZ[2], currPelXYZ[0]);
 

@@ -86,7 +86,7 @@ void cYuv::setDimensions(image* img, std::vector<int> ws, std::vector<int>hs, fl
  * ------------------------------------
  * Descrp: initializes the yuv reader
  */
-void cYuvReader::init(const char *fname, std::vector<int> ws, std::vector<int> hs, int n, bool mFlag,double AngleX, double AngleY)
+void cYuvReader::init(const char *fname, std::vector<int> ws, std::vector<int> hs, int n, bool mFlag,double AngleX, double AngleY, int invRotFlag)
 {
     // set parameters
     multFlag = mFlag;
@@ -101,9 +101,9 @@ void cYuvReader::init(const char *fname, std::vector<int> ws, std::vector<int> h
 
     // alloc memory
     if ( n == 1 || multFlag){
-        m_pY = img_alloc(  w,  h,n, AngleX, AngleY);
-        m_pU = img_alloc(w/2,h/2,n, AngleX, AngleY);
-        m_pV = img_alloc(w/2,h/2,n, AngleX, AngleY);
+        m_pY = img_alloc(  w,  h,n, AngleX, AngleY, invRotFlag);
+        m_pU = img_alloc(w/2,h/2,n, AngleX, AngleY, invRotFlag);
+        m_pV = img_alloc(w/2,h/2,n, AngleX, AngleY, invRotFlag);
     }
     // cube special case
     else if ( n == 6 ) {
@@ -291,7 +291,7 @@ void cYuvReader::buffer2Img(image* img, uint8_t* bufferIn, int w, int h, int off
  * Inputs:
  * Return:
  */
-image* cYuv::img_alloc(int w, int h, int n, double AngleX, double AngleY)
+image* cYuv::img_alloc(int w, int h, int n, double AngleX, double AngleY, int invRotFlag)
 {
     image* img = 0;
     img = (image *) calloc(n, sizeof (image));
@@ -305,6 +305,7 @@ image* cYuv::img_alloc(int w, int h, int n, double AngleX, double AngleY)
         img[i].s = 0;
         img[i].AngleX = AngleX;
         img[i].AngleY = AngleY;
+        img[i].invRotFlag = invRotFlag;
     }
     return img;
 }

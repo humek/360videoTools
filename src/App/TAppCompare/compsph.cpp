@@ -27,8 +27,9 @@ int main(int argc, char **argv){
     double AngleX = 0;
     double AngleY = 0;
     const char *rotFile = NULL;
+    int isFirstFrameRot = 0;
     const char *i = NULL, *o=NULL, *f=NULL, *w=NULL, *m=NULL,*n=NULL, *b=NULL,*v=NULL;
-    while ((c = getopt(argc, argv, "i:o:c:d:e:m:n:w:f:z:spv:b:")) != -1){
+    while ((c = getopt(argc, argv, "i:o:c:d:e:g:m:n:w:f:z:spv:b:")) != -1){
 	switch (c){
 	case 'i': i        = optarg;                    break;
 	case 'o': o        = optarg;                    break;
@@ -37,6 +38,7 @@ int main(int argc, char **argv){
   case 'c': AngleX = (double)strtof(optarg, 0);                      break;
   case 'd': AngleY = (double)strtof(optarg, 0);                     break;
   case 'e': rotFile = optarg;          break;
+  case 'g': isFirstFrameRot = (int)strtol(optarg, 0, 0);          break;     //is first frame roate, 0 for no, 1 for yep
 	case 's': swFlag   = true;                      break;
 	case 'p': mserFlag = true;                      break;
 	case 'm': m        = optarg;                    break;
@@ -108,7 +110,7 @@ int main(int argc, char **argv){
       }
     }
 
-    double t = sc.sphcomp(rotKeyMap, mserFlag);
+    double t = sc.sphcomp(rotKeyMap, isFirstFrameRot, mserFlag);
     printf("PSNR: %.15f\n",t);
 
     return 0;

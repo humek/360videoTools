@@ -270,7 +270,7 @@ z *         the type of interpolation
  */
 void remapper::init(const char* inp_map, const char* out_map, const char* interpl, const char* m, bool bf,
 		    int n, float x, float y, float w, float h, int z, const char* b, int v, float vp, float vt,
-        const char* t, const char* a, const char* inp, const char* out, double AngleX, double AngleY){
+        const char* t, const char* a, const char* inp, const char* out, double AngleX, double AngleY, int isInvRotMapping){
 
     sph2src   = charToSph2Map (inp_map);
     dst2sph   = charToMap2Sph (out_map);
@@ -324,7 +324,7 @@ void remapper::init(const char* inp_map, const char* out_map, const char* interp
 	G_ACSFLAG = true;
 
     // file read writers
-    srcYuv.init(inp, srcWid, srcHgt, srcDim[0].p, multFlag, AngleX, AngleY);
+    srcYuv.init(inp, srcWid, srcHgt, srcDim[0].p, multFlag, AngleX, AngleY, isInvRotMapping);
     dstYuv.init(out, dstDim.w, dstDim.h, dstDim.p);
 
     // deal with this later
@@ -340,7 +340,7 @@ void remapper::init(const char* inp_map, const char* out_map, const char* interp
  * Inputs: (none)
  * Return: (none)
  */
-void remapper::remapFrames(std::map<int, std::vector<double>> rotMap){
+void remapper::remapFrames(std::map<int, std::vector<double>> rotMap, int isfirstFrameRot){
     int nf = 0;
 
     double storeX, storeY;
@@ -348,7 +348,7 @@ void remapper::remapFrames(std::map<int, std::vector<double>> rotMap){
 	nf++;
 	printf("Frame: %d\r", nf); fflush(stdout);
 
-  if (nf == 1)
+  if (nf == 1 && isfirstFrameRot == 0)
   {
     storeX = srcYuv.getY()->AngleX;
     storeY = srcYuv.getY()->AngleY;
@@ -385,7 +385,7 @@ void remapper::remapFrames(std::map<int, std::vector<double>> rotMap){
 	remap(srcYuv.getY(), dstYuv.getY(), acsYuv.getY());	
 	remap(srcYuv.getU(), dstYuv.getU(), acsYuv.getU());	
 	remap(srcYuv.getV(), dstYuv.getV(), acsYuv.getV());	
-  if (nf == 1)
+  if (nf == 1 && isfirstFrameRot == 0)
   {
     srcYuv.getY()->AngleX = storeX;
     srcYuv.getY()->AngleY = storeY;
@@ -763,8 +763,9 @@ void sphcomparer::init(const char* srcmap1, const char* srcmap2, const char* int
     swFlag = swflag;
 
     // file read writers
-    sr1Yuv.init(inp1, sr1Wid, sr1Hgt, sr1Dim[0].p, multFlag1, AngleX, AngleY);
-    sr2Yuv.init(inp2, sr2Wid, sr2Hgt, sr2Dim[0].p, multFlag2, 0, 0);
+    int invRotFlag = 1;
+    sr1Yuv.init(inp1, sr1Wid, sr1Hgt, sr1Dim[0].p, multFlag1);
+    sr2Yuv.init(inp2, sr2Wid, sr2Hgt, sr2Dim[0].p, multFlag2, AngleX, AngleY, invRotFlag);
     sphData = readSphData(sph);
 }
 
@@ -776,7 +777,7 @@ void sphcomparer::init(const char* srcmap1, const char* srcmap2, const char* int
  * Inputs: (none)
  * Return: (float) PSNR
  */
-double sphcomparer::sphcomp(std::map<int, std::vector<double>> rotMap, bool mserFlag){
+double sphcomparer::sphcomp(std::map<int, std::vector<double>> rotMap, int isFirstFrameRot, bool mserFlag){
     int nf = 0;
     float ps = 0;
     double storeX, storeY;
@@ -794,33 +795,52 @@ double sphcomparer::sphcomp(std::map<int, std::vector<double>> rotMap, bool mser
 
 	      nf++;
 	      printf("Frame: %d\r",nf); fflush(stdout);
-
+        if (nf == 1 && isFirstFrameRot == 0)
+        {
+          storeX = sr2Yuv.getY()->AngleX;
+          storeY = sr2Yuv.getY()->AngleY;
+          sr2Yuv.getY()->AngleX = 0.0;
+          sr2Yuv.getY()->AngleY = 0.0;
+          sr2Yuv.getU()->AngleX = 0.0;
+          sr2Yuv.getU()->AngleY = 0.0;
+          sr2Yuv.getV()->AngleX = 0.0;
+          sr2Yuv.getV()->AngleY = 0.0;
+        }
         if (rotMap.size() != 0)
         {
           std::map<int, std::vector<double>>::iterator it = rotMap.find(nf - 1);
-          storeX = sr1Yuv.getY()->AngleX;
-          storeY = sr1Yuv.getY()->AngleY;
+          storeX = sr2Yuv.getY()->AngleX;
+          storeY = sr2Yuv.getY()->AngleY;
           if (it != rotMap.end())
           {
-            sr1Yuv.getY()->AngleX = it->second[0];
-            sr1Yuv.getY()->AngleY = it->second[1];
-            sr1Yuv.getU()->AngleX = it->second[0];
-            sr1Yuv.getU()->AngleY = it->second[1];
-            sr1Yuv.getV()->AngleX = it->second[0];
-            sr1Yuv.getV()->AngleY = it->second[1];
+            sr2Yuv.getY()->AngleX = it->second[0];
+            sr2Yuv.getY()->AngleY = it->second[1];
+            sr2Yuv.getU()->AngleX = it->second[0];
+            sr2Yuv.getU()->AngleY = it->second[1];
+            sr2Yuv.getV()->AngleX = it->second[0];
+            sr2Yuv.getV()->AngleY = it->second[1];
           }
         }
 	      sph1 = genSphFromImg(sr1Yuv.getY(), sph2sr1);
 	      sph2 = genSphFromImg(sr2Yuv.getY(), sph2sr2);
         ps += compareTwoSph(sr2Yuv.getY(), mserFlag);
+        if (nf == 1 && isFirstFrameRot == 0)
+        {
+          sr2Yuv.getY()->AngleX = storeX;
+          sr2Yuv.getY()->AngleY = storeY;
+          sr2Yuv.getU()->AngleX = storeX;
+          sr2Yuv.getU()->AngleY = storeY;
+          sr2Yuv.getV()->AngleX = storeX;
+          sr2Yuv.getV()->AngleY = storeY;
+        }
         if (rotMap.size() != 0)
         {
-          sr1Yuv.getY()->AngleX = storeX;
-          sr1Yuv.getY()->AngleY = storeY;
-          sr1Yuv.getU()->AngleX = storeX;
-          sr1Yuv.getU()->AngleY = storeY;
-          sr1Yuv.getV()->AngleX = storeX;
-          sr1Yuv.getV()->AngleY = storeY;
+          sr2Yuv.getY()->AngleX = storeX;
+          sr2Yuv.getY()->AngleY = storeY;
+          sr2Yuv.getU()->AngleX = storeX;
+          sr2Yuv.getU()->AngleY = storeY;
+          sr2Yuv.getV()->AngleX = storeX;
+          sr2Yuv.getV()->AngleY = storeY;
         }
     }
     printf("nf: %d\n",nf);
