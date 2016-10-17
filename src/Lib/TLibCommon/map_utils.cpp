@@ -1,5 +1,5 @@
 #include "map_utils.h"
-
+#include <algorithm>
 // ==============================================================================
 //                               GLOBAL VAR DEFS
 // ==============================================================================
@@ -26,11 +26,12 @@ const float G_OVX = G_OV/3.;
 //                               MAPPING LOOKUP TABLES
 // ==============================================================================
 void setupLatLUT(const char* fname){
-    FILE *fp = fopen(fname,"r");
+  FILE *fp;
+    fopen_s(&fp, fname, "r");
     G_LAT_INP_LUT = (float*) malloc (sizeof(float)*G_LAT_NUMPTS_LUT);
     G_LAT_OUT_LUT = (float*) malloc (sizeof(float)*G_LAT_NUMPTS_LUT);
     for(int z=0; z<G_LAT_NUMPTS_LUT; z++)
-	fscanf(fp, "%f %f", &G_LAT_INP_LUT[z], &G_LAT_OUT_LUT[z]);
+	fscanf_s(fp, "%f %f", &G_LAT_INP_LUT[z], &G_LAT_OUT_LUT[z]);
     fclose(fp);
 }
 
@@ -261,15 +262,229 @@ int sph2rect(int* f, float* i, float* j, const image* img, const float* v, int b
 
     float x, y, z;
     x = v[0]; y = v[1]; z = v[2];
-    
-    float phi = acosf(y);
-    float theta = atan2f(x, -z);
+    double currPelXYZ[3];
+    if (img->invRotFlag)
+    {
+      double AngleX = -img->AngleX;
+      double AngleY = -img->AngleY;
+
+      double b11 = cos(AngleX);
+      double b12 = -sin(AngleY)*sin(AngleX);
+      double b13 = -cos(AngleY)*sin(AngleX);
+      double b21 = 0;
+      double b22 = cos(AngleY);
+      double b23 = -sin(AngleY);
+      double b31 = sin(AngleX);
+      double b32 = cos(AngleX)*sin(AngleY);
+      double b33 = cos(AngleY)*cos(AngleX);
+
+      double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
+
+      for (int i = 0; i < 3; i++)
+      {
+        currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+      }
+    }
+    else
+    {
+      double AngleX = img->AngleX;
+      double AngleY = img->AngleY;
+      double b11 = cos(AngleX);
+      double b12 = 0;
+      double b13 = -sin(AngleX);
+      double b21 = -sin(AngleY)*sin(AngleX);
+      double b22 = cos(AngleY);
+      double b23 = -cos(AngleX)*sin(AngleY);
+      double b31 = cos(AngleY)*sin(AngleX);
+      double b32 = sin(AngleY);
+      double b33 = cos(AngleY)*cos(AngleX);
+
+      double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
+
+      for (int i = 0; i < 3; i++)
+      {
+        currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+      }
+    }
+
+    float phi = acosf(currPelXYZ[1]);
+    float theta = atan2f(currPelXYZ[2], currPelXYZ[0]);
 
     *f = 0;
     *i = h * (phi / PI);
     *j = w * (0.5f + theta / TWOPI);
 
     return 1;
+}
+
+int sph2sanson(int* f, float* i, float* j, const image* img, const float* v, int b){
+  int w = img->w;
+  int h = img->h;
+
+  float x, y, z;
+  x = v[0]; y = v[1]; z = v[2];
+  double currPelXYZ[3];
+  if (img->invRotFlag)
+  {
+    double AngleX = -img->AngleX;
+    double AngleY = -img->AngleY;
+
+    double b11 = cos(AngleX);
+    double b12 = -sin(AngleY)*sin(AngleX);
+    double b13 = -cos(AngleY)*sin(AngleX);
+    double b21 = 0;
+    double b22 = cos(AngleY);
+    double b23 = -sin(AngleY);
+    double b31 = sin(AngleX);
+    double b32 = cos(AngleX)*sin(AngleY);
+    double b33 = cos(AngleY)*cos(AngleX);
+
+    double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
+
+    for (int i = 0; i < 3; i++)
+    {
+      currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+    }
+  }
+  else
+  {
+    double AngleX = img->AngleX;
+    double AngleY = img->AngleY;
+    double b11 = cos(AngleX);
+    double b12 = 0;
+    double b13 = -sin(AngleX);
+    double b21 = -sin(AngleY)*sin(AngleX);
+    double b22 = cos(AngleY);
+    double b23 = -cos(AngleX)*sin(AngleY);
+    double b31 = cos(AngleY)*sin(AngleX);
+    double b32 = sin(AngleY);
+    double b33 = cos(AngleY)*cos(AngleX);
+
+    double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
+
+    for (int i = 0; i < 3; i++)
+    {
+      currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+    }
+  }
+  float phi = acosf(currPelXYZ[1]);
+  float theta = atan2f(currPelXYZ[2], currPelXYZ[0]);
+  double xxx = theta *(w / 2 * sin(phi)) / PI;
+  *f = 0;
+  *i = h * (phi / PI);
+  *j = w /2 + xxx;
+
+  return 1;
+}
+//************************************
+// Method:    sph2aitoff
+/*
+Conversion from longitude / latitude to Hammer - Aitoff coordinates(x, y)
+Consider longitude to range between - pi and pi, latitude between - pi / 2 and pi / 2.
+z2 = 1 + cos(latitude) cos(longitude / 2)
+x = cos(latitude) sin(longitude / 2) / z
+y = sin(latitude) / z
+(x, y) are each normalised coordinates, -1 to 1.
+*/
+//************************************
+int sph2aitoff(int* f, float* i, float* j, const image* img, const float* v, int b){
+  int w = img->w;
+  int h = img->h;
+
+  float x, y, z;
+  x = v[0]; y = v[1]; z = v[2];
+  double currPelXYZ[3];
+  if (img->invRotFlag)
+  {
+    double AngleX = -img->AngleX;
+    double AngleY = -img->AngleY;
+
+    double b11 = cos(AngleX);
+    double b12 = -sin(AngleY)*sin(AngleX);
+    double b13 = -cos(AngleY)*sin(AngleX);
+    double b21 = 0;
+    double b22 = cos(AngleY);
+    double b23 = -sin(AngleY);
+    double b31 = sin(AngleX);
+    double b32 = cos(AngleX)*sin(AngleY);
+    double b33 = cos(AngleY)*cos(AngleX);
+
+    double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
+
+    for (int i = 0; i < 3; i++)
+    {
+      currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+    }
+  }
+  else
+  {
+    double AngleX = img->AngleX;
+    double AngleY = img->AngleY;
+    double b11 = cos(AngleX);
+    double b12 = 0;
+    double b13 = -sin(AngleX);
+    double b21 = -sin(AngleY)*sin(AngleX);
+    double b22 = cos(AngleY);
+    double b23 = -cos(AngleX)*sin(AngleY);
+    double b31 = cos(AngleY)*sin(AngleX);
+    double b32 = sin(AngleY);
+    double b33 = cos(AngleY)*cos(AngleX);
+
+    double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
+
+    for (int i = 0; i < 3; i++)
+    {
+      currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
+    }
+  }
+  float phi = PI / 2 - acosf(currPelXYZ[1]);
+  float theta = atan2f(currPelXYZ[2], currPelXYZ[0]);
+
+  double z1 = sqrt(1 + cos(phi)*cos(theta / 2));
+
+  double tmpx = cos(phi) * sin(theta / 2) / z1;
+  double tmpy = sin(phi) / z1;
+  *f = 0;
+  *j = 0.0f + w/ 2 + tmpx * w / 2;
+  *i = 0.0f + h / 2 - tmpy * h / 2;
+
+  return 1;
+
+}
+
+
+int sph2poletop(int* f, float* i, float* j, const image* img, const float* v, int b){
+  int w = img->w;
+  int h = img->h;
+
+  float x, y, z;
+  x = v[0]; y = v[1]; z = v[2];
+
+  double scale = 512.0 / (4096.0 / 2.0 / PI);
+
+  *f = 0;
+  *j = 0.0f + (x / scale * w / 2) + w / 2;
+  *i = 0.0f - (z / scale * h / 2) + h / 2;
+
+  return 1;
+
+}
+
+int sph2poledown(int* f, float* i, float* j, const image* img, const float* v, int b){
+  int w = img->w;
+  int h = img->h;
+
+  float x, y, z;
+  x = v[0]; y = v[1]; z = v[2];
+
+  double scale = 512.0 / (4096.0 / 2.0 / PI);
+
+  *f = 0;
+  *j = 0.0f + (x / scale * w / 2) + w / 2;
+  *i = 0.0f + (z / scale * h / 2) + h / 2;
+
+  return 1;
+
 }
 
 int sph2eqar(int *f, float *i, float *j, const image* img, const float *v, int b){
@@ -808,7 +1023,7 @@ int sph2cube(int *f, float *i, float *j, const image* img, const float *v, int b
 
 
 // [mapping]2sph
-int eqar2sph(int f, float i, float j, int h, int w, float *v){
+int eqar2sph(int f, float i, float j, const image* img, int h, int w, float *v){
     const float y = (h/2.0f-i)/(h/2.0f);
     const float phi = asinf(y);
     const float theta = TWOPI * j / w - PI;
@@ -820,7 +1035,7 @@ int eqar2sph(int f, float i, float j, int h, int w, float *v){
     return 1;
 }
 
-int teqr2sph(int f, float i, float j, int h, int w, float *v){
+int teqr2sph(int f, float i, float j, const image* img, int h, int w, float *v){
     const float phi   = asinf(1-2.*(G_MAP_SF_Y*(i/h)+G_MAP_OFF_Y));
     const float theta = TWOPI * (G_MAP_SF_X*(j/w)+G_MAP_OFF_X) - PI;
 
@@ -831,10 +1046,15 @@ int teqr2sph(int f, float i, float j, int h, int w, float *v){
     return 1;
 }
 
-int rect2sph(int f, float i, float j, int h, int w, float *v){
-    const float lat = PIBY2 - PI * i / h;
-    const float lon = TWOPI * j / w - PI;
-
+int rect2sph(int f, float i, float j, const image* img, int h, int w, float *v){
+  //double adding = 1536;
+  //if (w < 3000)
+  //{
+  //  adding = 1024 - 256;
+  //}
+  //const float lat = PIBY2 - PI * (i + adding) / (w / 2);
+  const float lat = PIBY2 - PI * i / (w / 2);
+  const float lon = TWOPI * j / w - PI;
     v[0] =  sinf(lon) * cosf(lat);
     v[1] =              sinf(lat);
     v[2] = -cosf(lon) * cosf(lat);
@@ -842,7 +1062,211 @@ int rect2sph(int f, float i, float j, int h, int w, float *v){
     return 1;
 }
 
-int trec2sph(int f, float i, float j, int h, int w, float *v){
+int rectdown_inv2sph(int f, float i, float j, const image* img, int h, int w, float *v){
+  double adding = 1536;
+  if (w < 3000)
+  {
+    adding = 1024 - 256;
+  }
+  const float lat = PIBY2 - PI * (i + adding) / (w / 2);
+  const float lon = TWOPI * j / w - PI;
+  v[0] = sinf(lon) * cosf(lat);
+  v[1] = sinf(lat);
+  v[2] = -cosf(lon) * cosf(lat);
+
+  return 1;
+}
+
+int two2sph(int f, float i, float j, const image* img, int h, int w, float *v){
+  //const float lat = PIBY2 - PI * i / h;
+  //float lon;
+  //if (j < w / 2)
+  //{
+  //  lon = (j + w / 4 - (w / 2)) / (w / 2 * cos(lat)) * PI;
+
+
+  //  if (lon > PI / 2 || lon < -PI / 2)
+  //  {
+  //    v[0] = 0;
+  //    v[1] = 0;
+  //    v[2] = 0;
+  //  }
+  //  else
+  //  {
+  //    v[0] = sinf(lon) * cosf(lat);
+  //    v[1] = sinf(lat);
+  //    v[2] = -cosf(lon) * cosf(lat);
+  //  }
+  //}
+  //else
+  //{
+  //  lon = j - 3.0 / 4 * w  < 0 ? -PI - (j - 3.0 / 4 * w) / (w / 2 * cos(lat)) * PI : PI - (j - 3.0 / 4 * w) / (w / 2 * cos(lat)) * PI;
+
+
+
+  //  if ((j - 3.0 / 4 * w  > 0 && lon < PI && lon > PI / 2) || (j - 3.0 / 4 * w  < 0 && lon > -PI && lon < -PI / 2))
+  //  {
+  //    v[0] = sinf(lon) * cosf(lat);
+  //    v[1] = sinf(lat);
+  //    v[2] = -cosf(lon) * cosf(lat);
+  //  }
+  //  else
+  //  {
+  //    v[0] = 0;
+  //    v[1] = 0;
+  //    v[2] = 0;
+  //  }
+  //}
+
+
+  //return 1;
+
+  double y = 1.0 - i / (h / 2.0);
+
+  if (j < w / 2)
+  {
+    double x = (j + w / 4) / (w / 2.0) - 1.0;
+    double z = sqrt(1.0 - pow(x, 2) / 2 - pow(y, 2) / 2);
+    float lon = 2.0 * atan(sqrt(2)*x*z / (2 * pow(z, 2) - 1.0))*1.5708/1.4455;
+    float lat = asin(sqrt(2)*y*z);
+    if (x * lon >= 0 && lon <= PIBY2 && lon >= -PIBY2)
+    {
+      v[0] = sinf(lon) * cosf(lat);
+      v[1] = sinf(lat);
+      v[2] = -cosf(lon) * cosf(lat);
+    }
+    else
+      //if (x * lon < 0 && lon < PIBY2 && lon > -PIBY2 || z == 0)
+    {
+      v[0] = 0;
+      v[1] = 0;
+      v[2] = 0;
+    }
+
+    return 1;
+  }
+  else
+  {
+    double x =   (3.0 / 4 * w - j) / (w / 2.0);
+    double z = sqrt(1.0 - pow(x, 2) / 2 - pow(y, 2) / 2);
+    float lon = x > 0 ? PI - 2.0 * atan(sqrt(2)*x*z / (2 * pow(z, 2) - 1.0))*1.5708 / 1.4455 : -PI - 2.0 * atan(sqrt(2)*x*z / (2 * pow(z, 2) - 1.0))*1.5708 / 1.4455;
+    float lat = asin(sqrt(2)*y*z);
+    if ((lon <= PI && lon >= PIBY2) || (lon >= -PI && lon <= -PIBY2))
+    {
+      v[0] = sinf(lon) * cosf(lat);
+      v[1] = sinf(lat);
+      v[2] = -cosf(lon) * cosf(lat);
+    }
+    else
+      //if (x * lon < 0 && lon < PIBY2 && lon > -PIBY2 || z == 0)
+    {
+      v[0] = 0;
+      v[1] = 0;
+      v[2] = 0;
+    }
+
+    return 1;
+  }
+
+
+}
+int sanson2sph(int f, float i, float j, const image* img, int h, int w, float *v){
+  const float lat = PIBY2 - PI * i / (w / 2);
+  const float lon = (j - (w / 2)) / (w / 2 * cos(lat)) * PI;
+
+  if (lon > PI || lon < -PI)
+  {
+    v[0] = 0;
+    v[1] = 0;
+    v[2] = 0;
+  }
+  else
+  {
+    v[0] = sinf(lon) * cosf(lat);
+    v[1] = sinf(lat);
+    v[2] = -cosf(lon) * cosf(lat);
+  }
+
+
+  return 1;
+}
+
+int poletop2sph(int f, float i, float j, const image* img, int h, int w, float *v)
+{
+  double scale = 512.0 / (4096.0 / 2.0 / PI);
+
+  v[2] = (h / 2.0 - i) / (h / 2.0) * scale;
+  v[0] = (j - w / 2.0) / (w / 2.0) * scale;
+  v[1] = sqrt(1 - (v[2] * v[2] + v[0] * v[0]));
+
+  if (v[0] * v[0] + v[2] * v[2] > pow(scale, 2.0))
+  {
+    v[0] = 0;
+    v[1] = 0;
+    v[2] = 0;
+  }
+
+  return 1;
+}
+
+int poledown2sph(int f, float i, float j, const image* img, int h, int w, float *v)
+{
+  double scale = 512.0 / (4096.0 / 2.0 / PI);
+
+  v[2] = (i - h / 2.0) / (h / 2.0) * scale;
+  v[0] = (j - w / 2.0) / (w / 2.0) * scale;
+  v[1] = -sqrt(1 - (v[2] * v[2] + v[0] * v[0]));
+
+  if (v[0] * v[0] + v[2] * v[2] > pow(scale, 2.0))
+  {
+    v[0] = 0;
+    v[1] = 0;
+    v[2] = 0;
+  }
+
+  return 1;
+}
+
+
+//************************************
+// Method:    aitoff2sph
+/*
+Conversion of Hammer - Aitoff coordinates to longitude / latitude
+
+z2 = 1 - x2 / 2 - y2 / 2
+longitude = 2 atan(sqrt(2) x z / (2 z2 - 1))
+latitude = asin(sqrt(2) y z)
+
+The Hammer - Aitoff map is limited to where(x longitude) >= 0.
+*/
+
+//************************************
+int aitoff2sph(int f, float i, float j, const image* img, int h, int w, float *v){
+  double y = 1.0 - i / (h / 2.0);
+  double x = j / (w / 2.0) - 1.0;
+  double z = sqrt(1.0 - pow(x, 2) / 2 - pow(y, 2) / 2);
+  float lon = 2 * atan(sqrt(2)*x*z / (2 * pow(z, 2) - 1.0));
+  float lat = asin(sqrt(2)*y*z);
+
+  //v[0] = lon > 0 ? sqrt(1 + cosf(lat) * cosf(lon / 2)) : -sqrt(1 + cosf(lat) * cosf(lon / 2));
+  //v[2] = - cosf(lat) * sinf(lon / 2) / v[0];
+  //v[1] = sinf(lat) / v[0];
+
+  v[0] = sinf(lon) * cosf(lat);
+  v[1] = sinf(lat);
+  v[2] = -cosf(lon) * cosf(lat);
+  //if (x * lon < 0 || z == 0)
+  if (x*x + y * y > 1)
+  {
+    v[0] = 0;
+    v[1] = 0;
+    v[2] = 0;
+  }
+  
+  return 1;
+}
+
+int trec2sph(int f, float i, float j, const image* img, int h, int w, float *v){
     const float lat = PIBY2 - PI * (G_MAP_SF_Y*(i / h)+G_MAP_OFF_Y);
     const float lon = TWOPI * (G_MAP_SF_X*(j / w)+G_MAP_OFF_X) - PI;
 
@@ -853,19 +1277,19 @@ int trec2sph(int f, float i, float j, int h, int w, float *v){
     return 1;
 }
 
-int brec2sph(int f, float i, float j, int h, int w, float *v){
-    return trec2sph(f,i,j,h,w,v);
+int brec2sph(int f, float i, float j, const image* img, int h, int w, float *v){
+    return trec2sph(f,i,j,img, h,w,v);
 }
 
-int grid2sph(int f, float i, float j, int h, int w, float *v){
-    return trec2sph(f,i,j,h,w,v);
+int grid2sph(int f, float i, float j, const image* img, int h, int w, float *v){
+    return trec2sph(f,i,j,img,h,w,v);
 }
 
-int beqr2sph(int f, float i, float j, int h, int w, float *v){
-    return teqr2sph(f,i,j,h,w,v);
+int beqr2sph(int f, float i, float j, const image* img, int h, int w, float *v){
+    return teqr2sph(f,i,j,img,h,w,v);
 }
 
-int merc2sph(int f, float i, float j, int h, int w, float *v){
+int merc2sph(int f, float i, float j, const image* img, int h, int w, float *v){
     const float phi = atan(sinh(3-6.0*i/h));
     const float theta = TWOPI * j / w - PI;
 
@@ -876,22 +1300,22 @@ int merc2sph(int f, float i, float j, int h, int w, float *v){
     return 1;
 }
 
-int dyad2sph(int f, float i, float j, int h, int w, float *v){
+int dyad2sph(int f, float i, float j, const image* img, int h, int w, float *v){
     float lat = PIBY2 - PI * i / h;
     float lon = TWOPI * j / w - PI;
 
     if (fabsf(lat) <=PI/3.0)
-	return rect2sph(f,i,j,h,w,v);
+	return rect2sph(f,i,j,img,h,w,v);
     else if (lon > 0){
 	v[0] = 0;
 	v[1] = -1;
 	v[2] = 0;
 	return 1;
     }
-    return rect2sph(f,i,j,h,w/2,v);
+    return rect2sph(f,i,j,img,h,w/2,v);
 }
 
-int cube2sph(int f, float i, float j, int h, int w, float *c){
+int cube2sph(int f, float i, float j, const image* img, int h, int w, float *c){
     const int p[6][3][3] = {
         {{  0,  0, -1 }, {  0, -1,  0 }, {  1,  0,  0 }},
         {{  0,  0,  1 }, {  0, -1,  0 }, { -1,  0,  0 }},
@@ -918,7 +1342,7 @@ int cube2sph(int f, float i, float j, int h, int w, float *c){
     return 1;
 }
 
-int cos22sph(int f, float i, float j, int h, int w, float *v){
+int cos22sph(int f, float i, float j, const image* img, int h, int w, float *v){
     const float y = (h/2.0f-i)/(h/2.0f);
     const float phi = LUTinv(y);
     const float theta = TWOPI * j / w - PI;
@@ -930,7 +1354,7 @@ int cos22sph(int f, float i, float j, int h, int w, float *v){
     return 1;
 }
 
-int view2sph(int f, float v, float u, int h, int w, float *p){
+int view2sph(int f, float v, float u, const image* img, int h, int w, float *p){
     // normalized device coordinates: G_iK * [u;v;1]
     float x2 = G_iK[0][0]*u + G_iK[0][1]*v + G_iK[0][2];
     float y2 = G_iK[1][0]*u + G_iK[1][1]*v + G_iK[1][2];
@@ -956,8 +1380,29 @@ int view2sph(int f, float v, float u, int h, int w, float *p){
 // ==============================================================================
 void filter_nearest(const image *img, const image *acs, float i, float j, float *p)
 {
-    const float ii = clamp(i - 0.5f, 0.0f, img->h - 1.0f);
-    const float jj = clamp(j - 0.5f, 0.0f, img->w - 1.0f);
+     float ii = clamp(i - 0.5f, 0.0f, img->h - 1.0f);
+     float jj = clamp(j - 0.5f, 0.0f, img->w - 1.0f);
+
+    if (img->isSpatialFilterBound == 1)
+    {
+      double boundx;
+      if (ii > img->h / 2)
+      {
+        boundx = abs(sqrt(1.0 - pow((std::min(abs(img->h / 2 - ii) + 1, img->h - 1.0f)), 2.0) / pow(img->h / 2, 2.0)) * img->w / 2);
+      }
+      else
+      {
+        boundx = abs(sqrt(1.0 - pow(floor(ii - img->h / 2), 2.0) / pow(img->h / 2, 2.0)) * img->w / 2);
+      }
+      jj = clamp(jj, ceilf(img->w / 2 - boundx), floorf(img->w / 2 + boundx));
+    }
+    if (img->isSpatialFilterBound == 2)
+    {
+      double boundx;
+      double tmpPhi = ii > img->h / 2 ? PIBY2 - PI * ceilf(ii+1) / (img->w / 2) : PIBY2 - PI * floor(ii) / (img->w / 2);
+      boundx = (img->w / 2 * cos(tmpPhi));
+      jj = clamp(jj, ceilf(img->w / 2 - boundx), floorf(img->w / 2 + boundx));
+    }
 
     const long  i0 = lrintf(ii);
     const long  j0 = lrintf(jj);
@@ -975,11 +1420,12 @@ void filter_nearest(const image *img, const image *acs, float i, float j, float 
 }
 
 void filter_linear(const image *img, const image *acs, float i, float j, float *p){
-    const float ii = clamp(i - 0.5f, 0.0f, img->h - 1.0f);
-    const float jj = clamp(j - 0.5f, 0.0f, img->w - 1.0f);
+    float ii = clamp(i - 0.5f, 0.0f, img->h - 1.0f);
+    float jj = clamp(j - 0.5f, 0.0f, img->w - 1.0f);
 
-    const long  i0 = lrintf(floorf(ii)), i1 = lrintf(ceilf(ii));
-    const long  j0 = lrintf(floorf(jj)), j1 = lrintf(ceilf(jj));
+
+    long  i0 = lrintf(floorf(ii)), i1 = lrintf(ceilf(ii));
+    long  j0 = lrintf(floorf(jj)), j1 = lrintf(ceilf(jj));
 
     const float di = ii - i0;
     const float dj = jj - j0;
@@ -1013,10 +1459,30 @@ void filter_bicubic(const image *img, const image *acs, float i, float j, float 
     const int col_LB = 1;
     const int col_HB = img->h-2;
 
-    if( (i <= col_LB) || (i >= col_HB) || (j <= row_LB) || (j >= row_HB) ){
+    double AitoffCheck = 0;
+    double SansonCheck = 0;
+    if (img->isSpatialFilterBound == 1)
+    {
+      AitoffCheck = pow(abs((j + 0.5 - img->w / 2)) + 2, 2.0) / pow(img->w / 2, 2.0) + pow(abs((i + 0.5 - img->h / 2)) + 2, 2.0) / pow(img->h / 2, 2.0);
+    }
+    if (img->isSpatialFilterBound == 2)
+    {
+      double tmpPhi = i > img->h / 2 ? PIBY2 - PI * (i + 2) / (img->w / 2) : PIBY2 - PI * (i - 2) / (img->w / 2);
+      double tmptheta = (abs(j - (img->w / 2)) + 2 )/ (img->w / 2 * cos(tmpPhi)) * PI;
+      SansonCheck = tmptheta;
+    }
+  
+    if (AitoffCheck >= 1 || SansonCheck > PI)
+    {
+      filter_nearest(img, acs, i + 0.5, j + 0.5, p);
+      return;
+    }
+    if( (i <= col_LB) || (i >= col_HB) || (j <= row_LB) || (j >= row_HB)){
         filter_linear(img, acs, i+0.5, j+0.5, p);
         return;
     }
+
+    
 
     // FIND ROWS / COLS
     const long iZ = lrintf(floorf(i)-1);

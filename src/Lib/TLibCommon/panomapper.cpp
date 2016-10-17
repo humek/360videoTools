@@ -2,10 +2,10 @@
 
 // antialias filter lookups
 float G_AAFILTER_NONE[9]     = {    0.0,     0.0,     0.0,    0.0,    1.0,    0.0,     0.0,     0.0,     0.0};
-float G_AAFILTER_9TENTHS[9]  = {-0.0054,  0.0155, -0.0411, 0.0680, 0.9259, 0.0680, -0.0411,  0.0155, -0.0054};
-float G_AAFILTER_8TENTHS[9]  = {-0.0064,  0.0208, -0.0594, 0.1024, 0.8851, 0.1024, -0.0594,  0.0208, -0.0064};
-float G_AAFILTER_3FOURTHS[9] = {-0.0059,  0.0228, -0.0723, 0.1316, 0.8475, 0.1316, -0.0723,  0.0228, -0.0059};
-float G_AAFILTER_7TENTHS[9]  = {-0.0037,  0.0217, -0.0822, 0.1632, 0.8020, 0.1632, -0.0822,  0.0217, -0.0037};
+float G_AAFILTER_9TENTHS[9]  = {-0.0054f,  0.0155f, -0.0411f, 0.0680, 0.9259, 0.0680, -0.0411,  0.0155, -0.0054};
+float G_AAFILTER_8TENTHS[9]  = {-0.0064f,  0.0208, -0.0594, 0.1024, 0.8851, 0.1024, -0.0594,  0.0208, -0.0064};
+float G_AAFILTER_3FOURTHS[9] = {-0.0059f,  0.0228, -0.0723, 0.1316, 0.8475, 0.1316, -0.0723,  0.0228, -0.0059};
+float G_AAFILTER_7TENTHS[9]  = {-0.0037f,  0.0217, -0.0822, 0.1632, 0.8020, 0.1632, -0.0822,  0.0217, -0.0037};
 float G_AAFILTER_6TENTHS[9]  = { 0.0037,  0.0072, -0.0816, 0.2215, 0.6984, 0.2215, -0.0816,  0.0072,  0.0037};
 float G_AAFILTER_1HALF[9]    = { 0.0060, -0.0133, -0.0501, 0.2598, 0.5951, 0.2598, -0.0501, -0.0133,  0.0060};
 float G_AAFILTER_4TENTHS[9]  = { 0.0002, -0.0227, -0.0013, 0.2739, 0.4998, 0.2739, -0.0013, -0.0227,  0.0002};
@@ -31,6 +31,14 @@ sph2map panomapper::charToSph2Map(const char* s2m){
     if(s2m){
 	if(     !strcmp(s2m,"rect"))
 	    return sph2rect;
+  else if (!strcmp(s2m, "aitoff"))
+    return sph2aitoff;
+  else if (!strcmp(s2m, "sanson"))
+    return sph2sanson;
+  else if (!strcmp(s2m, "poletop"))
+    return sph2poletop;
+  else if (!strcmp(s2m, "poledown"))
+    return sph2poledown;
 	else if(!strcmp(s2m,"eqar"))
 	    return sph2eqar;
 	else if(!strcmp(s2m,"dyad"))
@@ -70,32 +78,46 @@ sph2map panomapper::charToSph2Map(const char* s2m){
  */
 map2sph panomapper::charToMap2Sph(const char* m2s){
     if(m2s){
-	if(     !strcmp(m2s,"rect"))
-	    return rect2sph;
-	else if(!strcmp(m2s,"eqar"))
-	    return eqar2sph;
-	else if(!strcmp(m2s,"dyad"))
-	    return dyad2sph;
-	else if(!strcmp(m2s,"merc"))
-	    return merc2sph;
-	else if(!strcmp(m2s,"cube"))
-	    return cube2sph;
-	else if(!strcmp(m2s,"cos2"))
-	    return cos22sph;
-	else if(!strcmp(m2s,"view"))
-	    return view2sph;
-	else if(!strcmp(m2s,"trec"))
-	    return trec2sph;
-	else if(!strcmp(m2s,"brec"))
-	    return brec2sph;
-	else if(!strcmp(m2s,"grid"))
-	    return grid2sph;
-	else if(!strcmp(m2s,"beqr"))
-	    return beqr2sph;
-	else if(!strcmp(m2s,"teqr"))
-	    return teqr2sph;
-	else
-	    fprintf(stderr,"No compatible mapping found: %s\n",m2s);
+      if (!strcmp(m2s, "rect"))
+        return rect2sph;
+      else if (!strcmp(m2s, "aitoff"))
+        return aitoff2sph;
+      else if (!strcmp(m2s, "sanson"))
+        return sanson2sph;
+      else if (!strcmp(m2s, "poletop"))
+        return poletop2sph;
+      else if (!strcmp(m2s, "poledown"))
+        return poledown2sph;
+      else if (!strcmp(m2s, "rectdown_inv"))
+        return rectdown_inv2sph;
+      else if (!strcmp(m2s, "recttop_inv"))
+        return rect2sph;
+      else if (!strcmp(m2s, "two"))
+        return two2sph;
+      else if (!strcmp(m2s, "eqar"))
+        return eqar2sph;
+      else if (!strcmp(m2s, "dyad"))
+        return dyad2sph;
+      else if (!strcmp(m2s, "merc"))
+        return merc2sph;
+      else if (!strcmp(m2s, "cube"))
+        return cube2sph;
+      else if (!strcmp(m2s, "cos2"))
+        return cos22sph;
+      else if (!strcmp(m2s, "view"))
+        return view2sph;
+      else if (!strcmp(m2s, "trec"))
+        return trec2sph;
+      else if (!strcmp(m2s, "brec"))
+        return brec2sph;
+      else if (!strcmp(m2s, "grid"))
+        return grid2sph;
+      else if (!strcmp(m2s, "beqr"))
+        return beqr2sph;
+      else if (!strcmp(m2s, "teqr"))
+        return teqr2sph;
+      else
+        fprintf(stderr, "No compatible mapping found: %s\n", m2s);
     }
     return rect2sph;
 }
@@ -228,7 +250,7 @@ remapper::remapper(){
     dstDim.h  = 500;
     dstDim.p  = 1;
     fview     = NULL;
-    numFrames = 1;
+    m_numFrames = 1;
     multFlag  = false;
     blendFlag = false;
 }
@@ -252,12 +274,12 @@ z *         the type of interpolation
  */
 void remapper::init(const char* inp_map, const char* out_map, const char* interpl, const char* m, bool bf,
 		    int n, float x, float y, float w, float h, int z, const char* b, int v, float vp, float vt,
-		    const char* t, const char* a, const char* inp, const char* out){
+        const char* t, const char* a, const char* inp, const char* out, double AngleX, double AngleY, int isInvRotMapping){
 
-    sph2src   = charToSph2Map(inp_map);
-    dst2sph   = charToMap2Sph(out_map);
-    fil       = charToInterpl(interpl);
-    numFrames = z;
+    sph2src   = charToSph2Map (inp_map);
+    dst2sph   = charToMap2Sph (out_map);
+    fil              = charToInterpl     (interpl);
+    m_numFrames = z;
 
     std::vector<int> srcHgt = charToIntVec(m);
     std::vector<int> srcWid = charToIntVec(b);
@@ -267,9 +289,10 @@ void remapper::init(const char* inp_map, const char* out_map, const char* interp
     numPages  = dstDim.p;
  
     // special cases
-    if(bf){
-	blendFlag = bf;
-	setBlend();
+    if(bf)
+    {
+      blendFlag = bf;
+      setBlend();
     }
     if(b>0)
 	srcDim    = sph2mapToDim(sph2src,srcHgt,srcWid);
@@ -277,25 +300,27 @@ void remapper::init(const char* inp_map, const char* out_map, const char* interp
 	dstDim    = map2sphToDim(dst2sph,n,v);
     if(dst2sph == cos22sph)
 	setupCos2();
-    if(dst2sph == view2sph){
-	dstDim = map2sphToDim(dst2sph,(int)h,(int)w);
-	viewFlag = true;
-	clearTrData();
-	setRotationMat(vp,vt);
-	fov.x = x;
-	fov.y = y;
-	if(t){
-	    trackFlag = true;
-	    fview = fopen(t,"r");
-	}
+    if(dst2sph == view2sph)
+    {
+      dstDim = map2sphToDim(dst2sph, (int)h, (int)w);
+      viewFlag = true;
+      clearTrData();
+      setRotationMat(vp, vt);
+      fov.x = x;
+      fov.y = y;
+      if (t){
+        trackFlag = true;
+        fopen_s(&fview, t, "r");
+      }
     }
-    if(dst2sph == trec2sph || dst2sph == teqr2sph || dst2sph == brec2sph || dst2sph == beqr2sph || dst2sph == grid2sph){
-	startXY.x = x;
-	startXY.y = y;
-	spanXY.x  = w;
-	spanXY.y  = h;
-	setMapOffset(startXY);
-	setMapScalefactor(spanXY);
+    if(dst2sph == trec2sph || dst2sph == teqr2sph || dst2sph == brec2sph || dst2sph == beqr2sph || dst2sph == grid2sph)
+    {
+	    startXY.x = x;
+	    startXY.y = y;
+	    spanXY.x  = w;
+	    spanXY.y  = h;
+	    setMapOffset(startXY);
+	    setMapScalefactor(spanXY);
     }
     if(sph2src == sph2mult || sph2src == sph2trec || sph2src == sph2teqr || sph2src == sph2brec || sph2src == sph2beqr || sph2src == sph2bmul || sph2src == sph2grid)
 	multFlag = true;
@@ -303,8 +328,8 @@ void remapper::init(const char* inp_map, const char* out_map, const char* interp
 	G_ACSFLAG = true;
 
     // file read writers
-    srcYuv.init(inp, srcWid,srcHgt,srcDim[0].p,multFlag);
-    dstYuv.init(out, dstDim.w,dstDim.h,dstDim.p);
+    srcYuv.init(inp, srcWid, srcHgt, srcDim[0].p, multFlag, AngleX, AngleY, isInvRotMapping);
+    dstYuv.init(out, dstDim.w, dstDim.h, dstDim.p);
 
     // deal with this later
     //if(G_ACSFLAG)
@@ -319,12 +344,41 @@ void remapper::init(const char* inp_map, const char* out_map, const char* interp
  * Inputs: (none)
  * Return: (none)
  */
-void remapper::remapFrames(){
+void remapper::remapFrames(std::map<int, std::vector<double>> rotMap, int isfirstFrameRot){
     int nf = 0;
-    while(nf < numFrames && srcYuv.readNextFrame()){
+
+    double storeX, storeY;
+    while(nf < m_numFrames && srcYuv.readNextFrame()){
 	nf++;
 	printf("Frame: %d\r", nf); fflush(stdout);
 
+  if (nf == 1 && isfirstFrameRot == 0)
+  {
+    storeX = srcYuv.getY()->AngleX;
+    storeY = srcYuv.getY()->AngleY;
+    srcYuv.getY()->AngleX = 0.0;
+    srcYuv.getY()->AngleY = 0.0;
+    srcYuv.getU()->AngleX = 0.0;
+    srcYuv.getU()->AngleY = 0.0;
+    srcYuv.getV()->AngleX = 0.0;
+    srcYuv.getV()->AngleY = 0.0;
+  }
+  if (rotMap.size() != 0)
+  {
+    std::map<int, std::vector<double>>::iterator it = rotMap.find(nf - 1);
+    storeX = srcYuv.getY()->AngleX;
+    storeY = srcYuv.getY()->AngleY;
+    if (it != rotMap.end())
+    {
+      srcYuv.getY()->AngleX = it->second[0];
+      srcYuv.getY()->AngleY = it->second[1];
+      srcYuv.getU()->AngleX = it->second[0];
+      srcYuv.getU()->AngleY = it->second[1];
+      srcYuv.getV()->AngleX = it->second[0];
+      srcYuv.getV()->AngleY = it->second[1];
+    }
+ 
+  }
 	if(trackFlag)
 	    readNextTrData(fview, nf, viewFlag);
 	if(G_ACSFLAG)
@@ -335,7 +389,24 @@ void remapper::remapFrames(){
 	remap(srcYuv.getY(), dstYuv.getY(), acsYuv.getY());	
 	remap(srcYuv.getU(), dstYuv.getU(), acsYuv.getU());	
 	remap(srcYuv.getV(), dstYuv.getV(), acsYuv.getV());	
-
+  if (nf == 1 && isfirstFrameRot == 0)
+  {
+    srcYuv.getY()->AngleX = storeX;
+    srcYuv.getY()->AngleY = storeY;
+    srcYuv.getU()->AngleX = storeX;
+    srcYuv.getU()->AngleY = storeY;
+    srcYuv.getV()->AngleX = storeX;
+    srcYuv.getV()->AngleY = storeY;
+  }
+  if (rotMap.size() != 0)
+  {
+    srcYuv.getY()->AngleX = storeX;
+    srcYuv.getY()->AngleY = storeY;
+    srcYuv.getU()->AngleX = storeX;
+    srcYuv.getU()->AngleY = storeY;
+    srcYuv.getV()->AngleX = storeX;
+    srcYuv.getV()->AngleY = storeY;
+  }
 	dstYuv.writeNextFrame();
 	if(G_ACSFLAG) 
 	    acsYuv.writeNextFrame(false);
@@ -501,14 +572,32 @@ void remapper::supersample(const image *src, const image *dst, const image *acs,
 	
         // Project and unproject giving the source location. Sample there.
         float v[3];
-        if (dst2sph(f, ii, jj, dst->h, dst->w, v) && sph2src(&F, &I, &J, src, v,1)){
+        if (dst2sph(f, ii, jj, src, dst->h, dst->w, v) && sph2src(&F, &I, &J, src, v, 1)){
+          if (sph2src == sph2aitoff)
+          {
+            image* p = const_cast<image*>(src);
+            p->isSpatialFilterBound = 1;
+          }
+          if (sph2src == sph2sanson)
+          {
+            image* p = const_cast<image*>(src);
+            p->isSpatialFilterBound = 2;
+          }
+          if (v[0] == 0 && v[1] == 0 && v[2] == 0)
+          {
+              p[0] = 0;
+          }
+          else
+          {
             fil(src + F, acs + F, I, J, p);
+          }
             c++;
         }
     }
     // Normalize the sample.
     for (k = 0; k < dst->c; k++)
         p[k] /= c;
+    
 }
 
 /*
@@ -558,7 +647,7 @@ void remapper::blendSample(const image *src, const image *dst, const image *acs,
 
     if (sph2src == sph2brec || sph2src == sph2beqr || sph2src == sph2bmul || sph2src == sph2grid){
 	// find the location that we want on the destination
-	if (dst2sph(f, ii, jj, dst->h, dst->w, v)){
+	if (dst2sph(f, ii, jj, src, dst->h, dst->w, v)){
 	    // determine whether its between images or not
 	    float a = aBlend(v);
 	    if(a==1.0 && sph2src(&F, &I, &J, src, v,1)){
@@ -575,7 +664,7 @@ void remapper::blendSample(const image *src, const image *dst, const image *acs,
 	}
     }
     else{
-	if (dst2sph(f, ii, jj, dst->h, dst->w, v) && sph2src(&F, &I, &J, src, v,1)){
+	if (dst2sph(f, ii, jj, src, dst->h, dst->w, v) && sph2src(&F, &I, &J, src, v,1)){
 	    fil(src + F, acs + F, I, J, p);
 	}
     }
@@ -618,7 +707,7 @@ sphcomparer::sphcomparer(){
     sph2sr2   = sph2rect;
     fil       = filter_bicubic;
     samp_pat  = &G_CENT_PATTERN;
-    numFrames = 1;
+    m_numFrames = 1;
     lwFlag    = false;
     swFlag    = false;
     multFlag1 = false;
@@ -648,11 +737,11 @@ sphcomparer::~sphcomparer(){
  */
 void sphcomparer::init(const char* srcmap1, const char* srcmap2, const char* interpl,
 		       const char* m, const char* n, int z, const char* b, const char* v, const char* wght, bool swflag,
-		       const char* inp1, const char* inp2, const char* sph){
+		       const char* inp1, const char* inp2, const char* sph, double AngleX, double AngleY){
     sph2sr1   = charToSph2Map(srcmap1);
     sph2sr2   = charToSph2Map(srcmap2);
     fil       = charToInterpl(interpl);
-    numFrames = z;
+    m_numFrames = z;
 
     std::vector<int> sr1Hgt = charToIntVec(m);
     std::vector<int> sr1Wid = charToIntVec(b);
@@ -678,8 +767,9 @@ void sphcomparer::init(const char* srcmap1, const char* srcmap2, const char* int
     swFlag = swflag;
 
     // file read writers
-    sr1Yuv.init(inp1, sr1Wid,sr1Hgt,sr1Dim[0].p,multFlag1);
-    sr2Yuv.init(inp2, sr2Wid,sr2Hgt,sr2Dim[0].p,multFlag2);
+    int invRotFlag = 1;
+    sr1Yuv.init(inp1, sr1Wid, sr1Hgt, sr1Dim[0].p, multFlag1);
+    sr2Yuv.init(inp2, sr2Wid, sr2Hgt, sr2Dim[0].p, multFlag2, AngleX, AngleY, invRotFlag);
     sphData = readSphData(sph);
 }
 
@@ -691,27 +781,71 @@ void sphcomparer::init(const char* srcmap1, const char* srcmap2, const char* int
  * Inputs: (none)
  * Return: (float) PSNR
  */
-double sphcomparer::sphcomp(bool mserFlag){
+double sphcomparer::sphcomp(std::map<int, std::vector<double>> rotMap, int isFirstFrameRot, bool mserFlag){
     int nf = 0;
     float ps = 0;
-    while(nf<numFrames){
-
-
-	bool sr1Flag = sr1Yuv.readNextFrame();
-	bool sr2Flag = sr2Yuv.readNextFrame();
+    double storeX, storeY;
+    while(nf<m_numFrames)
+    {
+	      bool sr1Flag = sr1Yuv.readNextFrame();
+	      bool sr2Flag = sr2Yuv.readNextFrame();
 	
-	if (sr1Flag && !sr2Flag)
-	    fprintf(stderr,"Src1 file longer than src2");
-	else if(!sr1Flag && sr2Flag)
-	    fprintf(stderr,"Src2 file longer than src1");
-	if(!sr1Flag || !sr2Flag)
-	    break;
+	      if (sr1Flag && !sr2Flag)
+	          fprintf(stderr,"Src1 file longer than src2");
+	      else if(!sr1Flag && sr2Flag)
+	          fprintf(stderr,"Src2 file longer than src1");
+	      if(!sr1Flag || !sr2Flag)
+	          break;
 
-	nf++;
-	printf("Frame: %d\r",nf); fflush(stdout);
-	sph1 = genSphFromImg(sr1Yuv.getY(), sph2sr1);
-	sph2 = genSphFromImg(sr2Yuv.getY(), sph2sr2);
-	ps += compareTwoSph(mserFlag);
+	      nf++;
+	      printf("Frame: %d\r",nf); fflush(stdout);
+        if (nf == 1 && isFirstFrameRot == 0)
+        {
+          storeX = sr2Yuv.getY()->AngleX;
+          storeY = sr2Yuv.getY()->AngleY;
+          sr2Yuv.getY()->AngleX = 0.0;
+          sr2Yuv.getY()->AngleY = 0.0;
+          sr2Yuv.getU()->AngleX = 0.0;
+          sr2Yuv.getU()->AngleY = 0.0;
+          sr2Yuv.getV()->AngleX = 0.0;
+          sr2Yuv.getV()->AngleY = 0.0;
+        }
+        if (rotMap.size() != 0)
+        {
+          std::map<int, std::vector<double>>::iterator it = rotMap.find(nf - 1);
+          storeX = sr2Yuv.getY()->AngleX;
+          storeY = sr2Yuv.getY()->AngleY;
+          if (it != rotMap.end())
+          {
+            sr2Yuv.getY()->AngleX = it->second[0];
+            sr2Yuv.getY()->AngleY = it->second[1];
+            sr2Yuv.getU()->AngleX = it->second[0];
+            sr2Yuv.getU()->AngleY = it->second[1];
+            sr2Yuv.getV()->AngleX = it->second[0];
+            sr2Yuv.getV()->AngleY = it->second[1];
+          }
+        }
+	      sph1 = genSphFromImg(sr1Yuv.getY(), sph2sr1);
+	      sph2 = genSphFromImg(sr2Yuv.getY(), sph2sr2);
+        ps += compareTwoSph(sr2Yuv.getY(), mserFlag);
+        if (nf == 1 && isFirstFrameRot == 0)
+        {
+          sr2Yuv.getY()->AngleX = storeX;
+          sr2Yuv.getY()->AngleY = storeY;
+          sr2Yuv.getU()->AngleX = storeX;
+          sr2Yuv.getU()->AngleY = storeY;
+          sr2Yuv.getV()->AngleX = storeX;
+          sr2Yuv.getV()->AngleY = storeY;
+        }
+        if (rotMap.size() != 0)
+        {
+          sr2Yuv.getY()->AngleX = storeX;
+          sr2Yuv.getY()->AngleY = storeY;
+          sr2Yuv.getU()->AngleX = storeX;
+          sr2Yuv.getU()->AngleY = storeY;
+          sr2Yuv.getV()->AngleX = storeX;
+          sr2Yuv.getV()->AngleY = storeY;
+        }
     }
     printf("nf: %d\n",nf);
     return ps/nf;
@@ -729,14 +863,14 @@ double sphcomparer::sphcomp(bool mserFlag){
  * Return: (float3*)  output sph
  */
 float3* sphcomparer::genSphFromImg(const image* src, sph2map sph2src){
-    float3* outSph = (float3*)malloc(sizeof(float3)*numPts);
-    memset(outSph,0,sizeof(float3)*numPts);
+  float3* outSph = (float3*)malloc(sizeof(float3)*numPts);
+  memset(outSph, 0, sizeof(float3)*numPts);
 
-    #pragma omp parallel for
-    for(long int i=0; i < numPts; i++)
-	sphPointFromImg(src,outSph,i,sph2src);
-    
-    return outSph;
+#pragma omp parallel for
+  for (long int i = 0; i < numPts; i++)
+    sphPointFromImg(src, outSph, i, sph2src);
+
+  return outSph;
 }
 
 /*
@@ -752,25 +886,27 @@ float3* sphcomparer::genSphFromImg(const image* src, sph2map sph2src){
  */
 void sphcomparer::sphPointFromImg(const image* src, float3* outSph, long int idx, sph2map sph2src){
     // get the proper indexing from the sphere point
-    float v[3];
-    float2 sd = {sphData[idx].x,sphData[idx].y};
-    float3 pt = sphToCart(sd);
-    v[0] = pt.x;
-    v[1] = pt.y;
-    v[2] = pt.z;
-    
-    // find the color of the point (dependent on src)
-    int F;
-    float I,J;
-    float p[3];
-    p[0] = 0;
-    p[1] = 0;
-    p[2] = 0;
-    sph2src(&F, &I, &J, src, v,1);
-    fil(src + F, NULL, I, J, p);
-    outSph[idx].x = p[0];
-    outSph[idx].y = p[1];
-    outSph[idx].z = p[2];
+  float v[3];
+  float2 sd = { sphData[idx].x, sphData[idx].y };
+  float3 pt = sphToCart(sd);
+  v[0] = pt.x;
+  v[1] = pt.y;
+  v[2] = pt.z;
+
+  // find the color of the point (dependent on src)
+  int F;
+  float I, J;
+  float p[3];
+  p[0] = 0;
+  p[1] = 0;
+  p[2] = 0;
+  sph2src(&F, &I, &J, src, v, 1);
+
+
+  fil(src + F, NULL, I, J, p);
+  outSph[idx].x = p[0];
+  outSph[idx].y = p[1];
+  outSph[idx].z = p[2];
 }
 
 /*
@@ -784,7 +920,7 @@ void sphcomparer::sphPointFromImg(const image* src, float3* outSph, long int idx
 float3* sphcomparer::readSphData(const char* fName){
     // get number of points from file name
     char fCopy[128];
-    strcpy(fCopy,fName);
+    strcpy_s(fCopy,fName);
     strtok(fCopy,"._");
     numPts = atol(strtok(NULL,"._"));
 
@@ -829,22 +965,22 @@ float sphcomparer::getLatWeight(float3 sd){
  *         (float2*)  sph data
  * Return: (float) comparison metric
  */
-double sphcomparer::compareTwoSph(bool mserFlag){
-    double ssdR = 0;
-    float latWeight = 0;
-    double totWeight=0;
-    for(int i=0; i<numPts; i++){
-	latWeight = getLatWeight(sphData[i]);
-	double v = sph1[i].x-sph2[i].x;
-	ssdR += 100000*latWeight*v*v;
-	totWeight+=latWeight;
-    }
-    double mseR = ssdR/totWeight/100000;
-    double psrR = 10*log10(1.0f/mseR);
-    
-    if(mserFlag)
-	return mseR;
-    return psrR;
+double sphcomparer::compareTwoSph(const image* src, bool mserFlag){
+  double ssdR = 0;
+  float latWeight = 0;
+  double totWeight = 0;
+  for (int i = 0; i < numPts; i++){
+    latWeight = getLatWeight(sphData[i]);
+    double v = sph1[i].x - sph2[i].x;
+    ssdR += 100000 * latWeight*v*v;
+    totWeight += latWeight;
+  }
+  double mseR = ssdR / totWeight / 100000;
+  double psrR = 10 * log10(1.0f / mseR);
+
+  if (mserFlag)
+    return mseR;
+  return psrR;
 }
 
 

@@ -17,6 +17,10 @@ struct image
     int    c;  // sample count
     int    b;  // sample depth
     int    s;  // sample format
+    int    isSpatialFilterBound;   //1 for Aitoff Projection; 2 for Sanson Projection
+    double AngleX;
+    double AngleY;
+    int    invRotFlag;
 };
 typedef struct image image;
 
@@ -51,7 +55,7 @@ protected:
     image    *m_pTmpY, *m_pTmpU, *m_pTmpV;      // temp y,u,v pointers
 
     std::vector<FILE*>    m_pFiles;
-    image*    img_alloc(int w, int h, int n);
+    image*    img_alloc(int w, int h, int n, double AngleX = 0.0, double AngleY = 0.0, int invRotFlag = 0);
     void      img_free(image* img);
     bool      multFlag;
     void      setDimensions(image* img, std::vector<int> ws, std::vector<int> hs, float sf, int pad=0);
@@ -106,7 +110,7 @@ private:
 public:
     cYuvReader()  { m_pBuffer = NULL; multFlag = false;};
     ~cYuvReader() { if (m_pBuffer) free(m_pBuffer); };
-    void init(const char* fname, std::vector<int> ws, std::vector<int> hs, int n, bool mFlag);
+    void init(const char* fname, std::vector<int> ws, std::vector<int> hs, int n, bool mFlag, double AngleX = 0.0, double AngleY = 0.0, int invRotFlag = 0);
     bool readNextFrame();
     bool readNextFrame(int pID);
 };
