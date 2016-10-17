@@ -17,7 +17,8 @@ TAppRemap.exe [-i input] [-o output] [-f filter] [-m input_height] [-b input_wid
 ```
  -i ... Input  file type, common: rect  eqar  cube                [rect]
 
-***added:** aitoff, sanson, two(used for mapping)  poletop, poledown(used to get the pole of the top/down of rect) recttop_inv, rectdown_inv (used for inv)* 
+***added:** aitoff, sanson, two(used for mapping)  poletop, poledown(used to get the pole 
+of the top/down of rect) recttop_inv, rectdown_inv (used for inv)* 
 ***not used:** dyad, mult, bmul, trec, brec, grid, beqr, teqr, merc, cos2*
 
 -o ... Output file type: cube, rect, eqar, merc, view             [rect]
