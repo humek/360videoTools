@@ -5,7 +5,9 @@ Need: openCV 3.1
 #Usage:
 支持remap与comapre S-PSNR/L-PSNR两种操作
 ##TAppRemap: 
-`TAppRemap.exe [-i input] [-o output] [-f filter] [-m input_height] [-b input_width] [-n output_height] [-v output_width] src dst  [-c rotx -d roty] [-e file.txt] [-g 1] [-u 1]`
+```
+TAppRemap.exe [-i input] [-o output] [-f filter] [-m input_height] [-b input_width] [-n output_height] [-v output_width] src dst  [-c rotx -d roty] [-e file.txt] [-g 1] [-u 1]
+```
 
  -i ... Input  file type, common: rect  eqar  cube                [rect]
 
@@ -55,23 +57,32 @@ Need: openCV 3.1
 ###Example:
 
 ###Remap:
-
-`TappRemap.exe -i rect -o aitoff -m 2048 -b 4096 -n 1024 -v 2048 -z 10 input.yuv aitoffOut_Rotate.yuv -c 0.8 -d 1.0 -g 1`
-
-`TappRemap.exe -i rect -o cube -m 2048 -b 4096 -n 512 -v 512 -z 10 input.yuv cube.yuv`
-
-`TappRemap.exe -i rect -o poledown -m 2048 -b 4096 -n 512 -v 512 -z 10 input.yuv poleOut.yuv`
+```
+TappRemap.exe -i rect -o aitoff -m 2048 -b 4096 -n 1024 -v 2048 -z 10 input.yuv aitoffOut_Rotate.yuv -c 0.8 -d 1.0 -g 1
+```
+```
+TappRemap.exe -i rect -o cube -m 2048 -b 4096 -n 512 -v 512 -z 10 input.yuv cube.yuv
+```
+```
+TappRemap.exe -i rect -o poledown -m 2048 -b 4096 -n 512 -v 512 -z 10 input.yuv poleOut.yuv
+```
 
 ###Inv Remap:
-`TappRemap.exe -i aitoff -o rect -m 1024 -b 2048 -n 2048 -v 4096 -z 10 aitoffOut_Rotate.yuv invRect.yuv -c 0.8 -d 1.0 -g 1 -u 1`
-
-`TappRemap.exe -i poledown -o rectdown -m 512 -b 512 -n 512 -v 4096 -z 10 poleOut.yuv rectInv.yuv`
+```
+TappRemap.exe -i aitoff -o rect -m 1024 -b 2048 -n 2048 -v 4096 -z 10 aitoffOut_Rotate.yuv invRect.yuv -c 0.8 -d 1.0 -g 1 -u 1
+```
+```
+TappRemap.exe -i poledown -o rectdown -m 512 -b 512 -n 512 -v 4096 -z 10 poleOut.yuv rectInv.yuv
+```
 
 ##TAppCompare: 
 支持不同投影方式、不同旋转角度的比较S-psnr或L-psnr
 
 ###Example:
-`TAppCompare.exe -i rect -o rect -m 2048 -b 4096 -n 2048 -v 4096 -z 1 source1.yuv source2.yuv -c 0.8 -d 1.0 sphere_655362.txt`
-
-`TAppCompare.exe -i rect -o aitoff -m 2048 -b 4096 -n 2048 -v 4096 -z 1 source1.yuv source2.yuv sphere_655362.txt`
+```
+TAppCompare.exe -i rect -o rect -m 2048 -b 4096 -n 2048 -v 4096 -z 1 source1.yuv source2.yuv -c 0.8 -d 1.0 sphere_655362.txt
+```
+```
+TAppCompare.exe -i rect -o aitoff -m 2048 -b 4096 -n 2048 -v 4096 -z 1 source1.yuv source2.yuv sphere_655362.txt
+```
 
