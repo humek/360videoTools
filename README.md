@@ -1,6 +1,11 @@
 # 360videoTools:
+
 base code fork自https://github.com/humek/omnieval
+
 Need: openCV 3.1
+
+支持420yuv格式的VR视频不同mapping之间的转换与计算spsnr
+
 重构了代码结构，源代码只能gcc编译，建立了vs工程。为便于比较，master第一个commit直接是源代码，不能编译通过。加入了多种mapping以及支持rotate的操作
 #Usage:
 支持remap与comapre S-PSNR/L-PSNR两种操作
