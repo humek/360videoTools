@@ -2,7 +2,7 @@
 
 base code fork自https://github.com/humek/omnieval
 
-Need: openCV 3.1
+Need: openCV 3.1，工程中需要根据路径include
 
 支持420yuv格式的VR视频不同mapping之间的转换与计算spsnr
 
@@ -14,7 +14,7 @@ Need: openCV 3.1
 TAppRemap.exe [-i input] [-o output] [-f filter] [-m input_height] [-b input_width] [-n output_height]
 [-v output_width] src dst  [-c rotx -d roty] [-e file.txt] [-g 1] [-u 1]
 ```
-
+```
  -i ... Input  file type, common: rect  eqar  cube                [rect]
 
 ***added:** aitoff, sanson, two(used for mapping)  poletop, poledown(used to get the pole of the top/down of rect) recttop_inv, rectdown_inv (used for inv)* 
@@ -59,6 +59,7 @@ TAppRemap.exe [-i input] [-o output] [-f filter] [-m input_height] [-b input_wid
 -g ... is first frame rotate                                           [0]
 
 -u ... is inv rotate  mapping                                       [0]
+```
 
 ###Example:
 
