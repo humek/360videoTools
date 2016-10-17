@@ -31,14 +31,14 @@ sph2map panomapper::charToSph2Map(const char* s2m){
     if(s2m){
 	if(     !strcmp(s2m,"rect"))
 	    return sph2rect;
-  if (!strcmp(s2m, "invrect"))
-    return sph2invrect;
   else if (!strcmp(s2m, "aitoff"))
     return sph2aitoff;
   else if (!strcmp(s2m, "sanson"))
     return sph2sanson;
-  else if (!strcmp(s2m, "pole"))
-    return sph2pole;
+  else if (!strcmp(s2m, "poletop"))
+    return sph2poletop;
+  else if (!strcmp(s2m, "poledown"))
+    return sph2poledown;
 	else if(!strcmp(s2m,"eqar"))
 	    return sph2eqar;
 	else if(!strcmp(s2m,"dyad"))
@@ -80,14 +80,18 @@ map2sph panomapper::charToMap2Sph(const char* m2s){
     if(m2s){
       if (!strcmp(m2s, "rect"))
         return rect2sph;
-      if (!strcmp(m2s, "invrect"))
-        return invrect2sph;
       else if (!strcmp(m2s, "aitoff"))
         return aitoff2sph;
       else if (!strcmp(m2s, "sanson"))
         return sanson2sph;
-      else if (!strcmp(m2s, "pole"))
-        return pole2sph;
+      else if (!strcmp(m2s, "poletop"))
+        return poletop2sph;
+      else if (!strcmp(m2s, "poledown"))
+        return poledown2sph;
+      else if (!strcmp(m2s, "rectdown_inv"))
+        return rectdown_inv2sph;
+      else if (!strcmp(m2s, "recttop_inv"))
+        return rect2sph;
       else if (!strcmp(m2s, "two"))
         return two2sph;
       else if (!strcmp(m2s, "eqar"))

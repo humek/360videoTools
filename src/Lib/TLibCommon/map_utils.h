@@ -139,10 +139,10 @@ float3 sphToCart(float2 sph);
  * Return: (int) success flag
  */
 int sph2rect(int *f, float* i, float* j, const image* img, const float* v, int b);
-int sph2invrect(int *f, float* i, float* j, const image* img, const float* v, int b);
 int sph2aitoff(int *f, float* i, float* j, const image* img, const float* v, int b);
 int sph2sanson(int *f, float* i, float* j, const image* img, const float* v, int b);
-int sph2pole(int *f, float* i, float* j, const image* img, const float* v, int b);
+int sph2poletop(int *f, float* i, float* j, const image* img, const float* v, int b);
+int sph2poledown(int *f, float* i, float* j, const image* img, const float* v, int b);
 int sph2eqar(int *f, float *i, float *j, const image* img, const float *v, int b);
 int sph2dyad(int *f, float *i, float *j, const image* img, const float *v, int b);
 int sph2cube(int *f, float *i, float *j, const image* img, const float *v, int b);
@@ -172,9 +172,10 @@ int sph2cos2(int *f, float *i, float *j, const image* img, const float *v, int b
  */
 int eqar2sph(int f, float i, float j, const image* img, int h, int w, float *v);
 int rect2sph(int f, float i, float j, const image* img,int h, int w, float *v);
-int invrect2sph(int f, float i, float j, const image* img, int h, int w, float *v);
 int sanson2sph(int f, float i, float j, const image* img, int h, int w, float *v);
-int pole2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int poletop2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int poledown2sph(int f, float i, float j, const image* img, int h, int w, float *v);
+int rectdown_inv2sph(int f, float i, float j, const image* img, int h, int w, float *v);
 int two2sph(int f, float i, float j, const image* img, int h, int w, float *v);
 int aitoff2sph(int f, float i, float j, const image* img, int h, int w, float *v);
 int dyad2sph(int f, float i, float j, const image* img, int h, int w, float *v);

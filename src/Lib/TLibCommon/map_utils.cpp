@@ -317,46 +317,6 @@ int sph2rect(int* f, float* i, float* j, const image* img, const float* v, int b
     return 1;
 }
 
-int sph2invrect(int* f, float* i, float* j, const image* img, const float* v, int b){
-  int w = img->w;
-  int h = img->h;
-
-  float x, y, z;
-  x = v[0]; y = v[1]; z = v[2];
-
-  double AngleX = -img->AngleX;
-  double AngleY = -img->AngleY;
-
-  double b11 = cos(AngleX);
-  double b12 = -sin(AngleY)*sin(AngleX);
-  double b13 = -cos(AngleY)*sin(AngleX);
-  double b21 = 0;
-  double b22 = cos(AngleY);
-  double b23 = -sin(AngleY);
-  double b31 = sin(AngleX);
-  double b32 = cos(AngleX)*sin(AngleY);
-  double b33 = cos(AngleY)*cos(AngleX);
-
-  double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
-
-
-  double currPelXYZ[3];
-
-  for (int i = 0; i < 3; i++)
-  {
-    currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
-  }
-
-  float phi = acosf(currPelXYZ[1]);
-  float theta = atan2f(currPelXYZ[2], currPelXYZ[0]);
-
-  *f = 0;
-  *i = h * (phi / PI);
-  *j = w * (0.5f + theta / TWOPI);
-
-  return 1;
-}
-
 int sph2sanson(int* f, float* i, float* j, const image* img, const float* v, int b){
   int w = img->w;
   int h = img->h;
@@ -416,6 +376,17 @@ int sph2sanson(int* f, float* i, float* j, const image* img, const float* v, int
 
   return 1;
 }
+//************************************
+// Method:    sph2aitoff
+/*
+Conversion from longitude / latitude to Hammer - Aitoff coordinates(x, y)
+Consider longitude to range between - pi and pi, latitude between - pi / 2 and pi / 2.
+z2 = 1 + cos(latitude) cos(longitude / 2)
+x = cos(latitude) sin(longitude / 2) / z
+y = sin(latitude) / z
+(x, y) are each normalised coordinates, -1 to 1.
+*/
+//************************************
 int sph2aitoff(int* f, float* i, float* j, const image* img, const float* v, int b){
   int w = img->w;
   int h = img->h;
@@ -482,18 +453,35 @@ int sph2aitoff(int* f, float* i, float* j, const image* img, const float* v, int
 }
 
 
-int sph2pole(int* f, float* i, float* j, const image* img, const float* v, int b){
+int sph2poletop(int* f, float* i, float* j, const image* img, const float* v, int b){
   int w = img->w;
   int h = img->h;
 
   float x, y, z;
   x = v[0]; y = v[1]; z = v[2];
 
-  double tmpx = x *(4096/2/PI) * w / 1024;
-  double tmpy = z * (4096 / 2 / PI)* w / 1024;
+  double scale = 512.0 / (4096.0 / 2.0 / PI);
+
   *f = 0;
-  *j = 0.0f + w / 2 + tmpx ;
-  *i = 0.0f + h / 2 - tmpy;
+  *j = 0.0f + (x / scale * w / 2) + w / 2;
+  *i = 0.0f - (z / scale * h / 2) + h / 2;
+
+  return 1;
+
+}
+
+int sph2poledown(int* f, float* i, float* j, const image* img, const float* v, int b){
+  int w = img->w;
+  int h = img->h;
+
+  float x, y, z;
+  x = v[0]; y = v[1]; z = v[2];
+
+  double scale = 512.0 / (4096.0 / 2.0 / PI);
+
+  *f = 0;
+  *j = 0.0f + (x / scale * w / 2) + w / 2;
+  *i = 0.0f + (z / scale * h / 2) + h / 2;
 
   return 1;
 
@@ -1074,14 +1062,13 @@ int rect2sph(int f, float i, float j, const image* img, int h, int w, float *v){
     return 1;
 }
 
-int invrect2sph(int f, float i, float j, const image* img, int h, int w, float *v){
-  //double adding = 1536;
-  //if (w < 3000)
-  //{
-  //  adding = 1024 - 256;
-  //}
-  //const float lat = PIBY2 - PI * (i + adding) / (w / 2);
-  const float lat = PIBY2 - PI * i / (w / 2);
+int rectdown_inv2sph(int f, float i, float j, const image* img, int h, int w, float *v){
+  double adding = 1536;
+  if (w < 3000)
+  {
+    adding = 1024 - 256;
+  }
+  const float lat = PIBY2 - PI * (i + adding) / (w / 2);
   const float lon = TWOPI * j / w - PI;
   v[0] = sinf(lon) * cosf(lat);
   v[1] = sinf(lat);
@@ -1204,19 +1191,15 @@ int sanson2sph(int f, float i, float j, const image* img, int h, int w, float *v
   return 1;
 }
 
-int pole2sph(int f, float i, float j, const image* img, int h, int w, float *v){
-  int scale = 1;
-  if (h < 600)
-  {
-    scale = 2;
-  }
-  v[2] = (h / 2.0 - i ) / (4096/2/PI) * scale;
-  v[0] = (j - w / 2.0) / (4096 / 2 / PI) * scale;
-  //double currRotatedPhi = asin(v[2]);
-  //double currRotatedTheta = acos(v[0] / cos(currRotatedPhi));
-  //v[1] = cos(currRotatedPhi)*sin(currRotatedTheta);
+int poletop2sph(int f, float i, float j, const image* img, int h, int w, float *v)
+{
+  double scale = 512.0 / (4096.0 / 2.0 / PI);
+
+  v[2] = (h / 2.0 - i) / (h / 2.0) * scale;
+  v[0] = (j - w / 2.0) / (w / 2.0) * scale;
   v[1] = sqrt(1 - (v[2] * v[2] + v[0] * v[0]));
-  if (v[0] * v[0] + v[2] * v[2] > pow(512/(4096/2/PI), 2))
+
+  if (v[0] * v[0] + v[2] * v[2] > pow(scale, 2.0))
   {
     v[0] = 0;
     v[1] = 0;
@@ -1226,6 +1209,38 @@ int pole2sph(int f, float i, float j, const image* img, int h, int w, float *v){
   return 1;
 }
 
+int poledown2sph(int f, float i, float j, const image* img, int h, int w, float *v)
+{
+  double scale = 512.0 / (4096.0 / 2.0 / PI);
+
+  v[2] = (i - h / 2.0) / (h / 2.0) * scale;
+  v[0] = (j - w / 2.0) / (w / 2.0) * scale;
+  v[1] = -sqrt(1 - (v[2] * v[2] + v[0] * v[0]));
+
+  if (v[0] * v[0] + v[2] * v[2] > pow(scale, 2.0))
+  {
+    v[0] = 0;
+    v[1] = 0;
+    v[2] = 0;
+  }
+
+  return 1;
+}
+
+
+//************************************
+// Method:    aitoff2sph
+/*
+Conversion of Hammer - Aitoff coordinates to longitude / latitude
+
+z2 = 1 - x2 / 2 - y2 / 2
+longitude = 2 atan(sqrt(2) x z / (2 z2 - 1))
+latitude = asin(sqrt(2) y z)
+
+The Hammer - Aitoff map is limited to where(x longitude) >= 0.
+*/
+
+//************************************
 int aitoff2sph(int f, float i, float j, const image* img, int h, int w, float *v){
   double y = 1.0 - i / (h / 2.0);
   double x = j / (w / 2.0) - 1.0;
