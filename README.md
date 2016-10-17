@@ -1,6 +1,6 @@
 # 360videoTools:
 base code fork自https://github.com/humek/omnieval
-依赖: openCV 3.1
+Need: openCV 3.1
 重构了代码结构，源代码只能gcc编译，建立了vs工程。为便于比较，master第一个commit直接是源代码，不能编译通过。加入了多种mapping以及支持rotate的操作
 #Usage:
 支持remap与comapre S-PSNR/L-PSNR两种操作
@@ -42,9 +42,9 @@ base code fork自https://github.com/humek/omnieval
 
 -z ... Number of frames                                            [MAX]
 
--c ... rotation of x                                                       [0]
+-c ... rotation of x(-pi--pi)                                        [0]
 
--d ... rotation of y                                                       [0]
+-d ... rotation of y(-pi--pi)                                        [0]
 
 -e ... file describe rotation 
 
@@ -52,19 +52,26 @@ base code fork自https://github.com/humek/omnieval
 
 -u ... is inv rotate  mapping                                       [0]
 
-Example:
+###Example:
 
-Remap:
+###Remap:
 
-TappRemap.exe -i rect -o aitoff -m 2048 -b 4096 -n 1024 -v 2048 -z 10 input.yuv aitoffOut_Rotate.yuv -c 0.8 -d 1.0 -g 1
+`TappRemap.exe -i rect -o aitoff -m 2048 -b 4096 -n 1024 -v 2048 -z 10 input.yuv aitoffOut_Rotate.yuv -c 0.8 -d 1.0 -g 1`
 
-TappRemap.exe -i rect -o cube -m 2048 -b 4096 -n 512 -v 512 -z 10 input.yuv cube.yuv
+`TappRemap.exe -i rect -o cube -m 2048 -b 4096 -n 512 -v 512 -z 10 input.yuv cube.yuv`
 
-TappRemap.exe -i rect -o poledown -m 2048 -b 4096 -n 512 -v 512 -z 10 input.yuv poleOut.yuv
+`TappRemap.exe -i rect -o poledown -m 2048 -b 4096 -n 512 -v 512 -z 10 input.yuv poleOut.yuv`
 
-Inv Remap:
-TappRemap.exe -i aitoff -o rect -m 1024 -b 2048 -n 2048 -v 4096 -z 10 aitoffOut_Rotate.yuv invRect.yuv -c 0.8 -d 1.0 -g 1 -u 1
+###Inv Remap:
+`TappRemap.exe -i aitoff -o rect -m 1024 -b 2048 -n 2048 -v 4096 -z 10 aitoffOut_Rotate.yuv invRect.yuv -c 0.8 -d 1.0 -g 1 -u 1`
 
-TappRemap.exe -i poledown -o rectdown -m 512 -b 512 -n 512 -v 4096 -z 10 poleOut.yuv rectInv.yuv
+`TappRemap.exe -i poledown -o rectdown -m 512 -b 512 -n 512 -v 4096 -z 10 poleOut.yuv rectInv.yuv`
 
-.\TAppCompare.exe -i rect -o rect -m 2048 -b 4096 -n 2048 -v 4096 -z 1 "D:\Sequence\VR\Seq1.yuv" d:\out.yuv  sphere_655362.txt
+##TAppCompare: 
+支持不同投影方式、不同旋转角度的比较S-psnr或L-psnr
+
+###Example:
+`TAppCompare.exe -i rect -o rect -m 2048 -b 4096 -n 2048 -v 4096 -z 1 source1.yuv source2.yuv -c 0.8 -d 1.0 sphere_655362.txt`
+
+`TAppCompare.exe -i rect -o aitoff -m 2048 -b 4096 -n 2048 -v 4096 -z 1 source1.yuv source2.yuv sphere_655362.txt`
+
