@@ -34,7 +34,7 @@ void cYuv::init(std::vector<int> ws, std::vector<int> hs, int n){
  */
 std::string cYuv::toNthYuv(const char* fbase, int n){
     std::string s = std::string(fbase);
-    int idx = s.find(".");
+    size_t idx = s.find(".");
     if (idx <0)
 	return std::string("");
 
@@ -77,8 +77,8 @@ void cYuv::yuvFileOpen(const char* fname, int n, bool readFlag){
  */
 void cYuv::setDimensions(image* img, std::vector<int> ws, std::vector<int>hs, float sf, int pad){
     for(int i=0;i<ws.size();i++){
-	img[i].w = ws[i]*sf+pad;
-	img[i].h = hs[i]*sf+pad;
+	img[i].w = (int)(ws[i]*sf+pad);
+  img[i].h = (int)(hs[i] * sf + pad);
     }
 }
 

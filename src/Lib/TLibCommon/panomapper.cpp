@@ -2,17 +2,17 @@
 
 // antialias filter lookups
 float G_AAFILTER_NONE[9]     = {    0.0,     0.0,     0.0,    0.0,    1.0,    0.0,     0.0,     0.0,     0.0};
-float G_AAFILTER_9TENTHS[9]  = {-0.0054f,  0.0155f, -0.0411f, 0.0680, 0.9259, 0.0680, -0.0411,  0.0155, -0.0054};
-float G_AAFILTER_8TENTHS[9]  = {-0.0064f,  0.0208, -0.0594, 0.1024, 0.8851, 0.1024, -0.0594,  0.0208, -0.0064};
-float G_AAFILTER_3FOURTHS[9] = {-0.0059f,  0.0228, -0.0723, 0.1316, 0.8475, 0.1316, -0.0723,  0.0228, -0.0059};
-float G_AAFILTER_7TENTHS[9]  = {-0.0037f,  0.0217, -0.0822, 0.1632, 0.8020, 0.1632, -0.0822,  0.0217, -0.0037};
-float G_AAFILTER_6TENTHS[9]  = { 0.0037,  0.0072, -0.0816, 0.2215, 0.6984, 0.2215, -0.0816,  0.0072,  0.0037};
-float G_AAFILTER_1HALF[9]    = { 0.0060, -0.0133, -0.0501, 0.2598, 0.5951, 0.2598, -0.0501, -0.0133,  0.0060};
-float G_AAFILTER_4TENTHS[9]  = { 0.0002, -0.0227, -0.0013, 0.2739, 0.4998, 0.2739, -0.0013, -0.0227,  0.0002};
-float G_AAFILTER_3TENTHS[9]  = {-0.0063, -0.0122,  0.0549, 0.2642, 0.3988, 0.2642,  0.0549, -0.0122, -0.0063};
-float G_AAFILTER_1FOURTH[9]  = {-0.0055,  0.0017,  0.0810, 0.2498, 0.3461, 0.2498,  0.0810,  0.0017, -0.0055};
-float G_AAFILTER_2TENTHS[9]  = { 0.0011,  0.0215,  0.1041, 0.2282, 0.2902, 0.2282,  0.1041,  0.0215,  0.0011};
-float G_AAFILTER_ZERO156[9]  = { 0.0181,  0.0488,  0.1227, 0.1967, 0.2274, 0.1967,  0.1227,  0.0488,  0.0181};
+float G_AAFILTER_9TENTHS[9]  = {-0.0054f,  0.0155f, -0.0411f, 0.0680f, 0.9259f, 0.0680f, -0.0411f,  0.0155f, -0.0054f};
+float G_AAFILTER_8TENTHS[9]  = {-0.0064f,  0.0208f, -0.0594f, 0.1024f, 0.8851f, 0.1024f, -0.0594f,  0.0208f, -0.0064f};
+float G_AAFILTER_3FOURTHS[9] = {-0.0059f,  0.0228f, -0.0723f, 0.1316f, 0.8475f, 0.1316f, -0.0723f,  0.0228f, -0.0059f};
+float G_AAFILTER_7TENTHS[9]  = {-0.0037f,  0.0217f, -0.0822f, 0.1632f, 0.8020f, 0.1632f, -0.0822f,  0.0217f, -0.0037f};
+float G_AAFILTER_6TENTHS[9]  = { 0.0037f,  0.0072f, -0.0816f, 0.2215f, 0.6984f, 0.2215f, -0.0816f,  0.0072f,  0.0037f};
+float G_AAFILTER_1HALF[9]    = { 0.0060f, -0.0133f, -0.0501f, 0.2598f, 0.5951f, 0.2598f, -0.0501f, -0.0133f,  0.0060f};
+float G_AAFILTER_4TENTHS[9]  = { 0.0002f, -0.0227f, -0.0013f, 0.2739f, 0.4998f, 0.2739f, -0.0013f, -0.0227f,  0.0002f};
+float G_AAFILTER_3TENTHS[9]  = {-0.0063f, -0.0122f,  0.0549f, 0.2642f, 0.3988f, 0.2642f,  0.0549f, -0.0122f, -0.0063f};
+float G_AAFILTER_1FOURTH[9]  = {-0.0055f,  0.0017f,  0.0810f, 0.2498f, 0.3461f, 0.2498f,  0.0810f,  0.0017f, -0.0055f};
+float G_AAFILTER_2TENTHS[9]  = { 0.0011f,  0.0215f,  0.1041f, 0.2282f, 0.2902f, 0.2282f,  0.1041f,  0.0215f,  0.0011f};
+float G_AAFILTER_ZERO156[9]  = { 0.0181f,  0.0488f,  0.1227f, 0.1967f, 0.2274f, 0.1967f,  0.1227f,  0.0488f,  0.0181f};
 
 panomapper::panomapper(){
 }
@@ -827,7 +827,7 @@ double sphcomparer::sphcomp(std::map<int, std::vector<double>> rotMap, int isFir
         }
 	      sph1 = genSphFromImg(sr1Yuv.getY(), sph2sr1);
 	      sph2 = genSphFromImg(sr2Yuv.getY(), sph2sr2);
-        ps += compareTwoSph(sr2Yuv.getY(), mserFlag);
+        ps += (float)compareTwoSph(sr2Yuv.getY(), mserFlag);
         if (nf == 1 && isFirstFrameRot == 0)
         {
           sr2Yuv.getY()->AngleX = storeX;

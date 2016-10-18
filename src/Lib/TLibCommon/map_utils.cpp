@@ -19,8 +19,8 @@ float  G_MAP_OFF_Y = 0.;
 float  G_MAP_OFF_X = 0.;
 float  G_MAP_SF_Y  = 0.;
 float  G_MAP_SF_X  = 0.;
-const float G_OV  = 0.02;
-const float G_OVX = G_OV/3.;
+const float G_OV  = 0.02f;
+const float G_OVX = G_OV/3.0f;
 
 // ==============================================================================
 //                               MAPPING LOOKUP TABLES
@@ -107,7 +107,7 @@ float LUTinv(float p){
 
     float diff = fabs(x1-x0);
     float diff0 = fabs(x0-p);
-    float alph = 1.0-diff0/diff;
+    float alph = 1.0f-diff0/diff;
     return alph*G_INP_LUT[idx0]+(1-alph)*G_INP_LUT[idx1];
 }
 
@@ -134,8 +134,8 @@ void clearTrData(){
 }
 
 void setRotationMat(float p, float t){
-    float phi = p*M_PI/180.0;
-    float tht = -t*M_PI/180.0;
+    float phi = (float)(p*M_PI/180.0f);
+    float tht = (float)(-t*M_PI/180.0f);
     
     G_R[0][0] =  cosf(tht);    G_R[0][1] = sinf(tht)*sinf(phi);    G_R[0][2] = sinf(tht)*cosf(phi);
     G_R[1][0] =       0.0f;    G_R[1][1] =           cosf(phi);    G_R[1][2] =          -sinf(phi);
@@ -160,8 +160,8 @@ void setRotationMat(float *rt, float *up, float *lk){
  * Outputs: Computes K and inv(K)
  */
 void setIntrMat(int dw, int dh, int sw, int sh, float fvx, float fvy){
-    float fovx = TWOPI * fvx/360.0;
-    float fovy = TWOPI * fvy/360.0;
+    float fovx = TWOPI * fvx/360.0f;
+    float fovy = TWOPI * fvy/360.0f;
 
     float fx = dw/2 * 1/tanf(fovx/2);
     float fy = dh/2 * 1/tanf(fovy/2);
@@ -307,8 +307,8 @@ int sph2rect(int* f, float* i, float* j, const image* img, const float* v, int b
       }
     }
 
-    float phi = acosf(currPelXYZ[1]);
-    float theta = atan2f(currPelXYZ[2], currPelXYZ[0]);
+    float phi = (float)(acos(currPelXYZ[1]));
+    float theta = (float)atan2(currPelXYZ[2], currPelXYZ[0]);
 
     *f = 0;
     *i = h * (phi / PI);
@@ -367,12 +367,12 @@ int sph2sanson(int* f, float* i, float* j, const image* img, const float* v, int
       currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
     }
   }
-  float phi = acosf(currPelXYZ[1]);
-  float theta = atan2f(currPelXYZ[2], currPelXYZ[0]);
+  float phi = (float)acos(currPelXYZ[1]);
+  float theta = (float)atan2(currPelXYZ[2], currPelXYZ[0]);
   double xxx = theta *(w / 2 * sin(phi)) / PI;
   *f = 0;
   *i = h * (phi / PI);
-  *j = w /2 + xxx;
+  *j = (float)(w /2 + xxx);
 
   return 1;
 }
@@ -437,16 +437,16 @@ int sph2aitoff(int* f, float* i, float* j, const image* img, const float* v, int
       currPelXYZ[i] = MatrixR[3 * i] * (-z) + MatrixR[3 * i + 1] * y + MatrixR[3 * i + 2] * x;
     }
   }
-  float phi = PI / 2 - acosf(currPelXYZ[1]);
-  float theta = atan2f(currPelXYZ[2], currPelXYZ[0]);
+  float phi = PI / 2 - acosf((float)currPelXYZ[1]);
+  float theta = (float)atan2(currPelXYZ[2], currPelXYZ[0]);
 
   double z1 = sqrt(1 + cos(phi)*cos(theta / 2));
 
   double tmpx = cos(phi) * sin(theta / 2) / z1;
   double tmpy = sin(phi) / z1;
   *f = 0;
-  *j = 0.0f + w/ 2 + tmpx * w / 2;
-  *i = 0.0f + h / 2 - tmpy * h / 2;
+  *j = (float)(0.0f + w/ 2 + tmpx * w / 2);
+  *i = (float)(0.0f + h / 2 - tmpy * h / 2);
 
   return 1;
 
@@ -463,8 +463,8 @@ int sph2poletop(int* f, float* i, float* j, const image* img, const float* v, in
   double scale = 512.0 / (4096.0 / 2.0 / PI);
 
   *f = 0;
-  *j = 0.0f + (x / scale * w / 2) + w / 2;
-  *i = 0.0f - (z / scale * h / 2) + h / 2;
+  *j = (float)(0.0f + (x / scale * w / 2) + w / 2);
+  *i = (float)(0.0f - (z / scale * h / 2) + h / 2);
 
   return 1;
 
@@ -480,8 +480,8 @@ int sph2poledown(int* f, float* i, float* j, const image* img, const float* v, i
   double scale = 512.0 / (4096.0 / 2.0 / PI);
 
   *f = 0;
-  *j = 0.0f + (x / scale * w / 2) + w / 2;
-  *i = 0.0f + (z / scale * h / 2) + h / 2;
+  *j = (float)(0.0f + (x / scale * w / 2) + w / 2);
+  *i = (float)(0.0f + (z / scale * h / 2) + h / 2);
 
   return 1;
 
@@ -515,8 +515,8 @@ int sph2merc(int *f, float *i, float *j, const image* img, const float *v, int b
     float theta = atan2f(x, -z);    // range: -pi to pi
 
     *f = 0;
-    *i = h * (3.0+fmin(log(tan(phi)+1.0/cos(phi)),3.0))/6;
-    *j = w * (0.5f + theta / TWOPI);
+    *i = (float)(h * (3.0 + fmin(log(tan(phi) + 1.0 / cos(phi)), 3.0)) / 6);
+    *j = (float)(w * (0.5f + theta / TWOPI));
 
     return 1;
 }
@@ -614,8 +614,8 @@ int sph2bmul(int *f, float *i, float *j, const image* img, const float *v, int b
     }
     else return 0;
 
-    *i = h*(y+(1.+G_OV*2.)) / (2.+G_OV*4.);
-    *j = w*(x+(1.+G_OV*2.)) / (2.+G_OV*4.);
+    *i = (float)(h*(y + (1. + G_OV*2.)) / (2. + G_OV*4.));
+    *j = (float)(w*(x + (1. + G_OV*2.)) / (2. + G_OV*4.));
 
     return 1;
 }
@@ -627,14 +627,14 @@ int sph2trec(int *f, float *i, float *j, const image* img, const float *v, int b
     float pmin  = 0.; 
 
     if     (phi <= 1./6) { *f = 0; w = img[0].w; h = img[0].h; pmin=0./6;} // pTop
-    else if(phi <= 2./6) { *f = 1; w = img[1].w; h = img[1].h; pmin=1./6;} // p1
-    else if(phi <= 3./6) { *f = 2; w = img[2].w; h = img[2].h; pmin=2./6;} // p2
-    else if(phi <= 4./6) { *f = 3; w = img[3].w; h = img[3].h; pmin=3./6;} // p3
-    else if(phi <= 5./6) { *f = 4; w = img[4].w; h = img[4].h; pmin=4./6;} // p4
-    else if(phi <= 6./6) { *f = 5; w = img[5].w; h = img[5].h; pmin=5./6;} // pBot
+    else if(phi <= 2./6) { *f = 1; w = img[1].w; h = img[1].h; pmin=1.f/6;} // p1
+    else if(phi <= 3./6) { *f = 2; w = img[2].w; h = img[2].h; pmin=2.f/6;} // p2
+    else if(phi <= 4./6) { *f = 3; w = img[3].w; h = img[3].h; pmin=3.f/6;} // p3
+    else if(phi <= 5./6) { *f = 4; w = img[4].w; h = img[4].h; pmin=4.f/6;} // p4
+    else if(phi <= 6./6) { *f = 5; w = img[5].w; h = img[5].h; pmin=5.f/6;} // pBot
     else return 0;
 
-    *i = h * (phi-pmin)/(1./6);
+    *i = (float)(h * (phi - pmin) / (1. / 6));
     *j = w * (0.5f + theta / TWOPI);
 
     return 1;
@@ -644,7 +644,6 @@ float aBlendBmul(const float *v){
     const float X = fabsf(v[0]);
     const float Y = fabsf(v[1]);
     const float Z = fabsf(v[2]);
-    float x,y;
 
     if(Y<Z && Y<X){
 	if     (v[2] <0 && v[0]>0 && X/Z>(1-2*G_OV) && X/Z<(1+2*G_OV)){return 1-(X/Z-(1-2*G_OV))/(4*G_OV);} //1,2
@@ -661,37 +660,37 @@ float aBlendBmul(const float *v){
 
 float aBlendBrec(const float *v){
     float phi   = acosf(v[1])/PI;
-    if      (phi > (1-G_OV)/6 && phi < (1+G_OV)/6) {return 1.-(phi-(1-G_OV)/6)/(2*G_OV)*6;}
-    else if (phi > (2-G_OV)/6 && phi < (2+G_OV)/6) {return 1.-(phi-(2-G_OV)/6)/(2*G_OV)*6;}
-    else if (phi > (3-G_OV)/6 && phi < (3+G_OV)/6) {return 1.-(phi-(3-G_OV)/6)/(2*G_OV)*6;}
-    else if (phi > (4-G_OV)/6 && phi < (4+G_OV)/6) {return 1.-(phi-(4-G_OV)/6)/(2*G_OV)*6;}
-    else if (phi > (5-G_OV)/6 && phi < (5+G_OV)/6) {return 1.-(phi-(5-G_OV)/6)/(2*G_OV)*6;}
+    if      (phi > (1-G_OV)/6 && phi < (1+G_OV)/6) {return 1.f-(phi-(1-G_OV)/6)/(2*G_OV)*6;}
+    else if (phi > (2-G_OV)/6 && phi < (2+G_OV)/6) {return 1.f-(phi-(2-G_OV)/6)/(2*G_OV)*6;}
+    else if (phi > (3-G_OV)/6 && phi < (3+G_OV)/6) {return 1.f-(phi-(3-G_OV)/6)/(2*G_OV)*6;}
+    else if (phi > (4-G_OV)/6 && phi < (4+G_OV)/6) {return 1.f-(phi-(4-G_OV)/6)/(2*G_OV)*6;}
+    else if (phi > (5-G_OV)/6 && phi < (5+G_OV)/6) {return 1.f-(phi-(5-G_OV)/6)/(2*G_OV)*6;}
     return 1.;
 }
 
 float aBlendGrid(const float *v){
     float phi   = acosf(v[1])/PI;
     float tht   = atan2f(v[0],-v[2])/TWOPI+0.5f;
-    if      (phi > (1-G_OV)/6 && phi < (1+G_OV)/6) {return 1.-(phi-(1-G_OV)/6)/(2*G_OV)*6;}
-    else if (phi > (2-G_OV)/6 && phi < (2+G_OV)/6) {return 1.-(phi-(2-G_OV)/6)/(2*G_OV)*6;}
-    else if (phi > (3-G_OV)/6 && phi < (3+G_OV)/6) {return 1.-(phi-(3-G_OV)/6)/(2*G_OV)*6;}
-    else if (phi > (4-G_OV)/6 && phi < (4+G_OV)/6) {return 1.-(phi-(4-G_OV)/6)/(2*G_OV)*6;}
-    else if (phi > (5-G_OV)/6 && phi < (5+G_OV)/6) {return 1.-(phi-(5-G_OV)/6)/(2*G_OV)*6;}
+    if      (phi > (1-G_OV)/6 && phi < (1+G_OV)/6) {return 1.f-(phi-(1-G_OV)/6)/(2*G_OV)*6;}
+    else if (phi > (2-G_OV)/6 && phi < (2+G_OV)/6) {return 1.f-(phi-(2-G_OV)/6)/(2*G_OV)*6;}
+    else if (phi > (3-G_OV)/6 && phi < (3+G_OV)/6) {return 1.f-(phi-(3-G_OV)/6)/(2*G_OV)*6;}
+    else if (phi > (4-G_OV)/6 && phi < (4+G_OV)/6) {return 1.f-(phi-(4-G_OV)/6)/(2*G_OV)*6;}
+    else if (phi > (5-G_OV)/6 && phi < (5+G_OV)/6) {return 1.f-(phi-(5-G_OV)/6)/(2*G_OV)*6;}
 
-    else if (tht > (1-G_OVX)/4 && tht < (1+G_OVX)/4) {return 1.-(tht-(1-G_OVX)/4)/(2*G_OVX)*4;}
-    else if (tht > (2-G_OVX)/4 && tht < (2+G_OVX)/4) {return 1.-(tht-(2-G_OVX)/4)/(2*G_OVX)*4;}
-    else if (tht > (3-G_OVX)/4 && tht < (3+G_OVX)/4) {return 1.-(tht-(3-G_OVX)/4)/(2*G_OVX)*4;}
+    else if (tht > (1-G_OVX)/4 && tht < (1+G_OVX)/4) {return 1.f-(tht-(1-G_OVX)/4)/(2*G_OVX)*4;}
+    else if (tht > (2-G_OVX)/4 && tht < (2+G_OVX)/4) {return 1.f-(tht-(2-G_OVX)/4)/(2*G_OVX)*4;}
+    else if (tht > (3-G_OVX)/4 && tht < (3+G_OVX)/4) {return 1.f-(tht-(3-G_OVX)/4)/(2*G_OVX)*4;}
     return 1.;
 }
 
 float aBlendBeqr(const float *v){
     float phi   = acosf(v[1]) - PIBY2;
-    float y     = (0.5+sinf(phi)/2.);
-    if      (y > (1-G_OV)/6 && y < (1+G_OV)/6) {return 1.-(y-(1-G_OV)/6)/(2*G_OV)*6;}
-    else if (y > (2-G_OV)/6 && y < (2+G_OV)/6) {return 1.-(y-(2-G_OV)/6)/(2*G_OV)*6;}
-    else if (y > (3-G_OV)/6 && y < (3+G_OV)/6) {return 1.-(y-(3-G_OV)/6)/(2*G_OV)*6;}
-    else if (y > (4-G_OV)/6 && y < (4+G_OV)/6) {return 1.-(y-(4-G_OV)/6)/(2*G_OV)*6;}
-    else if (y > (5-G_OV)/6 && y < (5+G_OV)/6) {return 1.-(y-(5-G_OV)/6)/(2*G_OV)*6;}
+    float y = (float)(0.5 + sin(phi) / 2.);
+    if      (y > (1-G_OV)/6 && y < (1+G_OV)/6) {return 1.f-(y-(1-G_OV)/6)/(2*G_OV)*6;}
+    else if (y > (2-G_OV)/6 && y < (2+G_OV)/6) {return 1.f-(y-(2-G_OV)/6)/(2*G_OV)*6;}
+    else if (y > (3-G_OV)/6 && y < (3+G_OV)/6) {return 1.f-(y-(3-G_OV)/6)/(2*G_OV)*6;}
+    else if (y > (4-G_OV)/6 && y < (4+G_OV)/6) {return 1.f-(y-(4-G_OV)/6)/(2*G_OV)*6;}
+    else if (y > (5-G_OV)/6 && y < (5+G_OV)/6) {return 1.f-(y-(5-G_OV)/6)/(2*G_OV)*6;}
     return 1.;
 }
 
@@ -747,44 +746,44 @@ int sph2grid(int *f, float *i, float *j, const image* img, const float *v, int b
 	if     (phi <= 1./6){ 
 	    pmin = 0.;
 	    if      (tht<=1./4){ *f = 0; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 1; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 2; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 3; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 1; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 2; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 3; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi <= 2./6){ 
-	    pmin = (1.-G_OV)/6.;
+	    pmin = (1.f-G_OV)/6.f;
 	    if      (tht<=1./4){ *f = 4; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 5; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 6; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 7; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 5; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 6; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 7; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi <= 3./6){ 
-	    pmin = (2.-G_OV)/6.;
+	    pmin = (2.f-G_OV)/6.f;
 	    if      (tht<=1./4){ *f = 8; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 9; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 10; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 11; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 9; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 10; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 11; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi <= 4./6){ 
-	    pmin = (3.-G_OV)/6.;
+	    pmin = (3.f-G_OV)/6.f;
 	    if      (tht<=1./4){ *f = 12; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 13; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 14; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 15; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 13; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 14; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 15; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi <= 5./6){ 
-	    pmin = (4.-G_OV)/6.;
+	    pmin = (4.f-G_OV)/6.f;
 	    if      (tht<=1./4){ *f = 16; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 17; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 18; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 19; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 17; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 18; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 19; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi <= 1.){ 
-	    pmin = (5.-G_OV)/6.;
+	    pmin = (5.f-G_OV)/6.f;
 	    if      (tht<=1./4){ *f = 20; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 21; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 22; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 23; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 21; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 22; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 23; tmin=(3.f-G_OVX)/4;}
 	}
 
     }
@@ -792,138 +791,138 @@ int sph2grid(int *f, float *i, float *j, const image* img, const float *v, int b
 	if     (phi >=(1.-G_OV)/6 && phi <= (1.+G_OV)/6){ 
 	    pmin = 0.;
 	    if      (tht<=1./4){ *f = 0; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 1; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 2; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 3; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 1; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 2; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 3; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi >=(1.-G_OV)/6 && phi <= (2.+G_OV)/6){ 
-	    pmin = (1.-G_OV)/6.;
+	    pmin = (1.f-G_OV)/6.f;
 	    if      (tht<=1./4){ *f = 4; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 5; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 6; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 7; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 5; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 6; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 7; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi >=(3.-G_OV)/6 && phi <= (3.+G_OV)/6){ 
-	    pmin = (2.-G_OV)/6.;
+	    pmin = (2.f-G_OV)/6.f;
 	    if      (tht<=1./4){ *f = 8; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 9; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 10; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 11; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 9; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 10; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 11; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi >=(4.-G_OV)/6 && phi <= (4.+G_OV)/6){ 
-	    pmin = (3.-G_OV)/6.;
+	    pmin = (3.f-G_OV)/6.f;
 	    if      (tht<=1./4){ *f = 12; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 13; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 14; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 15; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 13; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 14; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 15; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi >=(5.-G_OV)/6 && phi <= (5.+G_OV)/6){ 
-	    pmin = (4.-G_OV)/6.;
+	    pmin = (4.f-G_OV)/6.f;
 	    if      (tht<=1./4){ *f = 16; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 17; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 18; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 19; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 17; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 18; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 19; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(tht >= (1.-G_OVX)/4 && tht <= (1.+G_OVX)/4){
 	    tmin = 0.;
 	    if      (phi<=1./6){ *f = 0; pmin = 0.;} 
-	    else if (phi<=2./6){ *f = 4; pmin = (1.-G_OV)/6;}
-	    else if (phi<=3./6){ *f = 8; pmin = (2.-G_OV)/6;}
-	    else if (phi<=4./6){ *f = 12;pmin = (3.-G_OV)/6;}
-	    else if (phi<=5./6){ *f = 16;pmin = (4.-G_OV)/6;}
-	    else if (phi<=1.  ){ *f = 20;pmin = (5.-G_OV)/6;}
+	    else if (phi<=2./6){ *f = 4; pmin = (1.f-G_OV)/6;}
+	    else if (phi<=3./6){ *f = 8; pmin = (2.f-G_OV)/6;}
+	    else if (phi<=4./6){ *f = 12;pmin = (3.f-G_OV)/6;}
+	    else if (phi<=5./6){ *f = 16;pmin = (4.f-G_OV)/6;}
+	    else if (phi<=1.  ){ *f = 20;pmin = (5.f-G_OV)/6;}
 	}
 	else if(tht >= (2.-G_OVX)/4 && tht <= (2.+G_OVX)/4){
-	    tmin = (1.-G_OVX)/4;
+	    tmin = (1.f-G_OVX)/4;
 	    if      (phi<=1./6){ *f = 1; pmin = 0.;} 
-	    else if (phi<=2./6){ *f = 5; pmin = (1.-G_OV)/6;}
-	    else if (phi<=3./6){ *f = 9; pmin = (2.-G_OV)/6;}
-	    else if (phi<=4./6){ *f = 13;pmin = (3.-G_OV)/6;}
-	    else if (phi<=5./6){ *f = 17;pmin = (4.-G_OV)/6;}
-	    else if (phi<=1.  ){ *f = 21;pmin = (5.-G_OV)/6;}
+	    else if (phi<=2./6){ *f = 5; pmin = (1.f-G_OV)/6;}
+	    else if (phi<=3./6){ *f = 9; pmin = (2.f-G_OV)/6;}
+	    else if (phi<=4./6){ *f = 13;pmin = (3.f-G_OV)/6;}
+	    else if (phi<=5./6){ *f = 17;pmin = (4.f-G_OV)/6;}
+	    else if (phi<=1.  ){ *f = 21;pmin = (5.f-G_OV)/6;}
 	}
 	else if(tht >= (3.-G_OVX)/4 && tht <= (3.+G_OVX)/4){
-	    tmin = (2.-G_OVX)/4;
+	    tmin = (2.f-G_OVX)/4;
 	    if      (phi<=1./6){ *f = 2; pmin = 0.;} 
-	    else if (phi<=2./6){ *f = 6; pmin = (1.-G_OV)/6;}
-	    else if (phi<=3./6){ *f = 10;pmin = (2.-G_OV)/6;}
-	    else if (phi<=4./6){ *f = 14;pmin = (3.-G_OV)/6;}
-	    else if (phi<=5./6){ *f = 18;pmin = (4.-G_OV)/6;}
-	    else if (phi<=1.  ){ *f = 22;pmin = (5.-G_OV)/6;}
+	    else if (phi<=2./6){ *f = 6; pmin = (1.f-G_OV)/6;}
+	    else if (phi<=3./6){ *f = 10;pmin = (2.f-G_OV)/6;}
+	    else if (phi<=4./6){ *f = 14;pmin = (3.f-G_OV)/6;}
+	    else if (phi<=5./6){ *f = 18;pmin = (4.f-G_OV)/6;}
+	    else if (phi<=1.  ){ *f = 22;pmin = (5.f-G_OV)/6;}
 	}
     }
     else if(b==3){
 	if     ((phi >= (1.-G_OV)/6) && (phi <= (1.+G_OV)/6)){ 
-	    pmin = (1.-G_OV)/6;
+	    pmin = (1.f-G_OV)/6;
 	    if      (tht<=1./4){ *f = 4; tmin=0.;}
-	    else if (tht<=2./4){ *f = 5; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 6; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 7; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 5; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 6; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 7; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi >=(2.-G_OV)/6 && phi <= (2.+G_OV)/6){ 
-	    pmin = (2.-G_OV)/6.;
+	    pmin = (2.f-G_OV)/6;
 	    if      (tht<=1./4){ *f = 8; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 9; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 10; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 11; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 9; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 10; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 11; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi >=(3-G_OV)/6 && phi <= (3.+G_OV)/6){ 
-	    pmin = (3.-G_OV)/6.;
+	    pmin = (3.f-G_OV)/6.f;
 	    if      (tht<=1./4){ *f = 12; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 13; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 14; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 15; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 13; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 14; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 15; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi >=(4-G_OV)/6 && phi <= (4.+G_OV)/6){ 
-	    pmin = (4.-G_OV)/6.;
+	    pmin = (4.f-G_OV)/6.f;
 	    if      (tht<=1./4){ *f = 16; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 17; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 18; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 19; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 17; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 18; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 19; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(phi >=(5-G_OV)/6 && phi <= (5.+G_OV)/6){ 
-	    pmin = (5.-G_OV)/6.;
+	    pmin = (5.f-G_OV)/6.f;
 	    if      (tht<=1./4){ *f = 20; tmin=0.  ;}
-	    else if (tht<=2./4){ *f = 21; tmin=(1.-G_OVX)/4;}
-	    else if (tht<=3./4){ *f = 22; tmin=(2.-G_OVX)/4;}
-	    else if (tht<=1.  ){ *f = 23; tmin=(3.-G_OVX)/4;}
+	    else if (tht<=2./4){ *f = 21; tmin=(1.f-G_OVX)/4;}
+	    else if (tht<=3./4){ *f = 22; tmin=(2.f-G_OVX)/4;}
+	    else if (tht<=1.  ){ *f = 23; tmin=(3.f-G_OVX)/4;}
 	}
 	else if(tht >= (1.-G_OVX)/4 && tht <= (1.+G_OVX)/4){
-	    tmin = (1.-G_OVX)/4;
+	    tmin = (1.f-G_OVX)/4;
 	    if      (phi<=1./6){ *f = 1; pmin = 0.;} 
-	    else if (phi<=2./6){ *f = 5; pmin = (1.-G_OV)/6;}
-	    else if (phi<=3./6){ *f = 9; pmin = (2.-G_OV)/6;}
-	    else if (phi<=4./6){ *f = 13;pmin = (3.-G_OV)/6;}
-	    else if (phi<=5./6){ *f = 17;pmin = (4.-G_OV)/6;}
-	    else if (phi<=1.  ){ *f = 21;pmin = (5.-G_OV)/6;}
+	    else if (phi<=2./6){ *f = 5; pmin = (1.f-G_OV)/6;}
+	    else if (phi<=3./6){ *f = 9; pmin = (2.f-G_OV)/6;}
+	    else if (phi<=4./6){ *f = 13;pmin = (3.f-G_OV)/6;}
+	    else if (phi<=5./6){ *f = 17;pmin = (4.f-G_OV)/6;}
+	    else if (phi<=1.  ){ *f = 21;pmin = (5.f-G_OV)/6;}
 	}
 	else if(tht >= (2.-G_OVX)/4 && tht <= (2.+G_OVX)/4){
-	    tmin = (2.-G_OVX)/4;
+	    tmin = (2.f-G_OVX)/4;
 	    if      (phi<=1./6){ *f = 2; pmin = 0.;} 
-	    else if (phi<=2./6){ *f = 6; pmin = (1.-G_OV)/6;}
-	    else if (phi<=3./6){ *f = 10;pmin = (2.-G_OV)/6;}
-	    else if (phi<=4./6){ *f = 14;pmin = (3.-G_OV)/6;}
-	    else if (phi<=5./6){ *f = 18;pmin = (4.-G_OV)/6;}
-	    else if (phi<=1.  ){ *f = 22;pmin = (5.-G_OV)/6;}
+	    else if (phi<=2./6){ *f = 6; pmin = (1.f-G_OV)/6;}
+	    else if (phi<=3./6){ *f = 10;pmin = (2.f-G_OV)/6;}
+	    else if (phi<=4./6){ *f = 14;pmin = (3.f-G_OV)/6;}
+	    else if (phi<=5./6){ *f = 18;pmin = (4.f-G_OV)/6;}
+	    else if (phi<=1.  ){ *f = 22;pmin = (5.f-G_OV)/6;}
 	}
 	else if(tht >= (3.-G_OVX)/4 && tht <= (3.+G_OVX)/4){
-	    tmin = (3.-G_OVX)/4;
+	    tmin = (3.f-G_OVX)/4;
 	    if      (phi<=1./6){ *f = 3; pmin = 0.;} 
-	    else if (phi<=2./6){ *f = 7; pmin = (1.-G_OV)/6;}
-	    else if (phi<=3./6){ *f = 11;pmin = (2.-G_OV)/6;}
-	    else if (phi<=4./6){ *f = 15;pmin = (3.-G_OV)/6;}
-	    else if (phi<=5./6){ *f = 19;pmin = (4.-G_OV)/6;}
-	    else if (phi<=1.  ){ *f = 23;pmin = (5.-G_OV)/6;}
+	    else if (phi<=2./6){ *f = 7; pmin = (1.f-G_OV)/6;}
+	    else if (phi<=3./6){ *f = 11;pmin = (2.f-G_OV)/6;}
+	    else if (phi<=4./6){ *f = 15;pmin = (3.f-G_OV)/6;}
+	    else if (phi<=5./6){ *f = 19;pmin = (4.f-G_OV)/6;}
+	    else if (phi<=1.  ){ *f = 23;pmin = (5.f-G_OV)/6;}
 	}
     }
     else return 0;
 
     if      (*f ==0 || *f==4 || *f==8  || *f == 12 || *f == 16 || *f == 20)
-	tspn = (1.+G_OVX)/4;
+	tspn = (1.f+G_OVX)/4;
     else if (*f== 3 || *f ==7|| *f==11 || *f == 15 || *f == 19 || *f == 23)
-	tspn = (1.+G_OVX)/4;
+	tspn = (1.f+G_OVX)/4;
     if      (*f==0 <=3 || *f >=20)
-	pspn = (1.+G_OV)/6;
+	pspn = (1.f+G_OV)/6.f;
 
     w = img[*f].w;
     h = img[*f].h;
@@ -937,7 +936,7 @@ int sph2grid(int *f, float *i, float *j, const image* img, const float *v, int b
 int sph2beqr(int *f, float *i, float *j, const image* img, const float *v, int b){
     int w,h;
     float phi   = acosf(v[1]) - PIBY2;
-    float y     = (0.5+sinf(phi)/2.);
+    float y = (float)(0.5 + sin(phi) / 2.);
     float theta = atan2f(v[0],-v[2]);
     float pmin  = 0.; 
     float pspn  = (1+2*G_OV)/6;
@@ -978,19 +977,19 @@ int sph2beqr(int *f, float *i, float *j, const image* img, const float *v, int b
 int sph2teqr(int *f, float *i, float *j, const image* img, const float *v, int b){
     int w,h;
     float phi   = acosf(v[1]) - PIBY2;
-    float y     = (0.5+sinf(phi)/2.);
+    float y = (float)(0.5 + sin(phi) / 2.);
     float theta = atan2f(v[0],-v[2]);
     float pmin  = 0.; 
 
     if     (y <= 1./6) { *f = 0; w = img[0].w; h = img[0].h; pmin=0./6;} // pTop
-    else if(y <= 2./6) { *f = 1; w = img[1].w; h = img[1].h; pmin=1./6;} // p1
-    else if(y <= 3./6) { *f = 2; w = img[2].w; h = img[2].h; pmin=2./6;} // p2
-    else if(y <= 4./6) { *f = 3; w = img[3].w; h = img[3].h; pmin=3./6;} // p3
-    else if(y <= 5./6) { *f = 4; w = img[4].w; h = img[4].h; pmin=4./6;} // p4
-    else if(y <= 6./6) { *f = 5; w = img[5].w; h = img[5].h; pmin=5./6;} // pBot
+    else if(y <= 2./6) { *f = 1; w = img[1].w; h = img[1].h; pmin=1.f/6;} // p1
+    else if(y <= 3./6) { *f = 2; w = img[2].w; h = img[2].h; pmin=2.f/6;} // p2
+    else if(y <= 4./6) { *f = 3; w = img[3].w; h = img[3].h; pmin=3.f/6;} // p3
+    else if(y <= 5./6) { *f = 4; w = img[4].w; h = img[4].h; pmin=4.f/6;} // p4
+    else if(y <= 6./6) { *f = 5; w = img[5].w; h = img[5].h; pmin=5.f/6;} // pBot
     else return 0;
 
-    *i = h * (y-pmin)/(1./6);
+    *i = (float)(h * (y - pmin) / (1. / 6));
     *j = w * (0.5f + theta / TWOPI);
 
     return 1;
@@ -1036,7 +1035,7 @@ int eqar2sph(int f, float i, float j, const image* img, int h, int w, float *v){
 }
 
 int teqr2sph(int f, float i, float j, const image* img, int h, int w, float *v){
-    const float phi   = asinf(1-2.*(G_MAP_SF_Y*(i/h)+G_MAP_OFF_Y));
+  const float phi = (float)(asin(1 - 2.*(G_MAP_SF_Y*(i / h) + G_MAP_OFF_Y)));
     const float theta = TWOPI * (G_MAP_SF_X*(j/w)+G_MAP_OFF_X) - PI;
 
     v[0] =  sinf(theta) * cosf(phi);
@@ -1068,7 +1067,7 @@ int rectdown_inv2sph(int f, float i, float j, const image* img, int h, int w, fl
   {
     adding = 1024 - 256;
   }
-  const float lat = PIBY2 - PI * (i + adding) / (w / 2);
+  const float lat = (float)(PIBY2 - PI * (i + adding) / (w / 2));
   const float lon = TWOPI * j / w - PI;
   v[0] = sinf(lon) * cosf(lat);
   v[1] = sinf(lat);
@@ -1127,8 +1126,8 @@ int two2sph(int f, float i, float j, const image* img, int h, int w, float *v){
   {
     double x = (j + w / 4) / (w / 2.0) - 1.0;
     double z = sqrt(1.0 - pow(x, 2) / 2 - pow(y, 2) / 2);
-    float lon = 2.0 * atan(sqrt(2)*x*z / (2 * pow(z, 2) - 1.0))*1.5708/1.4455;
-    float lat = asin(sqrt(2)*y*z);
+    float lon = (float)(2.0 * atan(sqrt(2)*x*z / (2 * pow(z, 2) - 1.0))*1.5708 / 1.4455);
+    float lat = (float)(asin(sqrt(2)*y*z));
     if (x * lon >= 0 && lon <= PIBY2 && lon >= -PIBY2)
     {
       v[0] = sinf(lon) * cosf(lat);
@@ -1149,8 +1148,9 @@ int two2sph(int f, float i, float j, const image* img, int h, int w, float *v){
   {
     double x =   (3.0 / 4 * w - j) / (w / 2.0);
     double z = sqrt(1.0 - pow(x, 2) / 2 - pow(y, 2) / 2);
-    float lon = x > 0 ? PI - 2.0 * atan(sqrt(2)*x*z / (2 * pow(z, 2) - 1.0))*1.5708 / 1.4455 : -PI - 2.0 * atan(sqrt(2)*x*z / (2 * pow(z, 2) - 1.0))*1.5708 / 1.4455;
-    float lat = asin(sqrt(2)*y*z);
+    float lon = x > 0 ? (float)(PI - 2.0 * atan(sqrt(2)*x*z / (2 * pow(z, 2) - 1.0))*1.5708 / 1.4455) : 
+                                  (float)(-PI - 2.0 * atan(sqrt(2)*x*z / (2 * pow(z, 2) - 1.0))*1.5708 / 1.4455);
+    float lat = (float)asin(sqrt(2)*y*z);
     if ((lon <= PI && lon >= PIBY2) || (lon >= -PI && lon <= -PIBY2))
     {
       v[0] = sinf(lon) * cosf(lat);
@@ -1195,8 +1195,8 @@ int poletop2sph(int f, float i, float j, const image* img, int h, int w, float *
 {
   double scale = 512.0 / (4096.0 / 2.0 / PI);
 
-  v[2] = (h / 2.0 - i) / (h / 2.0) * scale;
-  v[0] = (j - w / 2.0) / (w / 2.0) * scale;
+  v[2] = (float)((h / 2.0 - i) / (h / 2.0) * scale);
+  v[0] = (float)((j - w / 2.0) / (w / 2.0) * scale);
   v[1] = sqrt(1 - (v[2] * v[2] + v[0] * v[0]));
 
   if (v[0] * v[0] + v[2] * v[2] > pow(scale, 2.0))
@@ -1213,8 +1213,8 @@ int poledown2sph(int f, float i, float j, const image* img, int h, int w, float 
 {
   double scale = 512.0 / (4096.0 / 2.0 / PI);
 
-  v[2] = (i - h / 2.0) / (h / 2.0) * scale;
-  v[0] = (j - w / 2.0) / (w / 2.0) * scale;
+  v[2] = (float)((i - h / 2.0) / (h / 2.0) * scale);
+  v[0] = (float)((j - w / 2.0) / (w / 2.0) * scale);
   v[1] = -sqrt(1 - (v[2] * v[2] + v[0] * v[0]));
 
   if (v[0] * v[0] + v[2] * v[2] > pow(scale, 2.0))
@@ -1245,8 +1245,8 @@ int aitoff2sph(int f, float i, float j, const image* img, int h, int w, float *v
   double y = 1.0 - i / (h / 2.0);
   double x = j / (w / 2.0) - 1.0;
   double z = sqrt(1.0 - pow(x, 2) / 2 - pow(y, 2) / 2);
-  float lon = 2 * atan(sqrt(2)*x*z / (2 * pow(z, 2) - 1.0));
-  float lat = asin(sqrt(2)*y*z);
+  float lon = (float)(2 * atan(sqrt(2)*x*z / (2 * pow(z, 2) - 1.0)));
+  float lat = (float)(asin(sqrt(2)*y*z));
 
   //v[0] = lon > 0 ? sqrt(1 + cosf(lat) * cosf(lon / 2)) : -sqrt(1 + cosf(lat) * cosf(lon / 2));
   //v[2] = - cosf(lat) * sinf(lon / 2) / v[0];
@@ -1290,7 +1290,7 @@ int beqr2sph(int f, float i, float j, const image* img, int h, int w, float *v){
 }
 
 int merc2sph(int f, float i, float j, const image* img, int h, int w, float *v){
-    const float phi = atan(sinh(3-6.0*i/h));
+  const float phi = (float)(atan(sinh(3 - 6.0*i / h)));
     const float theta = TWOPI * j / w - PI;
 
     v[0] =  sinf(theta) * cosf(phi);
@@ -1394,14 +1394,14 @@ void filter_nearest(const image *img, const image *acs, float i, float j, float 
       {
         boundx = abs(sqrt(1.0 - pow(floor(ii - img->h / 2), 2.0) / pow(img->h / 2, 2.0)) * img->w / 2);
       }
-      jj = clamp(jj, ceilf(img->w / 2 - boundx), floorf(img->w / 2 + boundx));
+      jj = clamp(jj, ceilf((float)(img->w / 2 - boundx)), floorf((float)(img->w / 2 + boundx)));
     }
     if (img->isSpatialFilterBound == 2)
     {
       double boundx;
       double tmpPhi = ii > img->h / 2 ? PIBY2 - PI * ceilf(ii+1) / (img->w / 2) : PIBY2 - PI * floor(ii) / (img->w / 2);
       boundx = (img->w / 2 * cos(tmpPhi));
-      jj = clamp(jj, ceilf(img->w / 2 - boundx), floorf(img->w / 2 + boundx));
+      jj = clamp(jj, ceilf((float)(img->w / 2 - boundx)), floorf((float)(img->w / 2 + boundx)));
     }
 
     const long  i0 = lrintf(ii);
@@ -1474,11 +1474,11 @@ void filter_bicubic(const image *img, const image *acs, float i, float j, float 
   
     if (AitoffCheck >= 1 || SansonCheck > PI)
     {
-      filter_nearest(img, acs, i + 0.5, j + 0.5, p);
+      filter_nearest(img, acs, i + 0.5f, j + 0.5f, p);
       return;
     }
     if( (i <= col_LB) || (i >= col_HB) || (j <= row_LB) || (j >= row_HB)){
-        filter_linear(img, acs, i+0.5, j+0.5, p);
+        filter_linear(img, acs, i+0.5f, j+0.5f, p);
         return;
     }
 

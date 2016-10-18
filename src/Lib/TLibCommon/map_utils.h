@@ -63,7 +63,7 @@ const pattern G_CENT_PATTERN = {  1, G_CENT_POINTS};
 //                               INLINE HELPER FUNCTIONS
 // ==============================================================================
 inline float sign(float x){
-    float s = (x > 0) ? 1.0 : ((x < 0) ? -1.0 : 0.0);
+    float s = (x > 0) ? 1.0f : ((x < 0) ? -1.0f : 0.0f);
     return s;
 }
 inline float lerp(float a, float b, float k){
