@@ -82,7 +82,7 @@ TappRemap.exe -i aitoff -o rect -m 1024 -b 2048 -n 2048 -v 4096 -z 10 aitoffOut_
 invRect.yuv -c 0.8 -d 1.0 -g 1 -u 1
 ```
 ```
-TappRemap.exe -i poledown -o rectdown -m 512 -b 512 -n 512 -v 4096 -z 10 poleOut.yuv rectInv.yuv
+TappRemap.exe -i poledown -o rectdown_inv -m 512 -b 512 -n 512 -v 4096 -z 10 poleOut.yuv rectInv.yuv
 ```
 
 ##TAppCompare: 
