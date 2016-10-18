@@ -51,24 +51,37 @@ std::string cYuv::toNthYuv(const char* fbase, int n){
  */
 void cYuv::yuvFileOpen(const char* fname, int n, bool readFlag){
     // just one file to read/write
-    if(!multFlag){
-	if(readFlag)
-	    m_pFiles.push_back(fopen(fname,"rb"));
-	else
-	    m_pFiles.push_back(fopen(fname,"wb+"));
-	if(m_pFiles[0] == NULL)
-	    fputs ("File read error\n", stderr);
+  FILE *fp = NULL;
+  if (!multFlag)
+  {
+    if (readFlag)
+    {
+      fopen_s(&fp, fname, "rb");
+      m_pFiles.push_back(fp);
     }
-    // multiple files
-    else{
-	if(readFlag){
-	    for(int i=0;i<n;i++){
-		m_pFiles.push_back(fopen(toNthYuv(fname,i).c_str(),"rb"));
-		if(m_pFiles[i]==NULL)
-		    fputs ("File read error\n", stderr);
-	    }
-	}
+    else
+    {
+      fopen_s(&fp, fname, "wb+");
+      m_pFiles.push_back(fp);
     }
+    if (m_pFiles[0] == NULL)
+    {
+      fputs("File read error\n", stderr);
+    }
+  }
+  // multiple files
+  else
+  {
+    if (readFlag){
+      for (int i = 0; i < n; i++)
+      {
+        fopen_s(&fp, toNthYuv(fname, i).c_str(), "rb");
+        m_pFiles.push_back(fp);
+        if (m_pFiles[i] == NULL)
+          fputs("File read error\n", stderr);
+      }
+    }
+  }
 }
 
 /* setDimensions

@@ -920,21 +920,23 @@ void sphcomparer::sphPointFromImg(const image* src, float3* outSph, long int idx
 float3* sphcomparer::readSphData(const char* fName){
     // get number of points from file name
     char fCopy[128];
+    char *p = NULL;
     strcpy_s(fCopy,fName);
-    strtok(fCopy,"._");
-    numPts = atol(strtok(NULL,"._"));
+    strtok_s(fCopy,"._", &p);
+    numPts = atol(strtok_s(NULL,"._", &p));
 
     // allocate memory
     float3* spd = (float3*)malloc(sizeof(float3)*numPts);
     memset(spd,0,sizeof(float3)*numPts);
 
     // read data
-    FILE *fp = fopen(fName,"r");
+    FILE *fp = NULL;
+    fopen_s(&fp, fName, "r");
     for(int z=0; z<numPts; z++){
 	if(swFlag)
-	    fscanf(fp, "%f %f %f", &spd[z].x, &spd[z].y, &spd[z].z);
+	    fscanf_s(fp, "%f %f %f", &spd[z].x, &spd[z].y, &spd[z].z);
 	else
-	    fscanf(fp, "%f %f", &spd[z].x, &spd[z].y);
+	    fscanf_s(fp, "%f %f", &spd[z].x, &spd[z].y);
     }
     return spd;
 }

@@ -205,7 +205,7 @@ int readNextTrData(FILE* ft, int nf, bool& bTrdata){
     int tr = 0;     // frame num
     float ts = 0;   // time stamp
 
-    if ( feof(ft) || !fscanf(ft, "%d,", &tr) ){
+    if ( feof(ft) || !fscanf_s(ft, "%d,", &tr) ){
         bTrdata = false;
         printf("Frame: %d\n", nf);
         printf ("Track file shorter than yuv..using last track\n");
@@ -220,13 +220,13 @@ int readNextTrData(FILE* ft, int nf, bool& bTrdata){
     }
 
     // read time stamp
-    fscanf(ft, "%f,", &ts);
+    fscanf_s(ft, "%f,", &ts);
 
     // read vectors
     float rt[3], up[3], lk[3];
-    fscanf(ft, "%f,", &rt[0]); fscanf(ft, "%f,", &rt[1]); fscanf(ft, "%f,", &rt[2]);
-    fscanf(ft, "%f,", &up[0]); fscanf(ft, "%f,", &up[1]); fscanf(ft, "%f,", &up[2]);
-    fscanf(ft, "%f,", &lk[0]); fscanf(ft, "%f,", &lk[1]); fscanf(ft, "%f,", &lk[2]);
+    fscanf_s(ft, "%f,", &rt[0]); fscanf_s(ft, "%f,", &rt[1]); fscanf_s(ft, "%f,", &rt[2]);
+    fscanf_s(ft, "%f,", &up[0]); fscanf_s(ft, "%f,", &up[1]); fscanf_s(ft, "%f,", &up[2]);
+    fscanf_s(ft, "%f,", &lk[0]); fscanf_s(ft, "%f,", &lk[1]); fscanf_s(ft, "%f,", &lk[2]);
 
     // rotation matrix
     setRotationMat(rt, up, lk);
@@ -921,7 +921,7 @@ int sph2grid(int *f, float *i, float *j, const image* img, const float *v, int b
 	tspn = (1.f+G_OVX)/4;
     else if (*f== 3 || *f ==7|| *f==11 || *f == 15 || *f == 19 || *f == 23)
 	tspn = (1.f+G_OVX)/4;
-    if      (*f==0 <=3 || *f >=20)
+    if      (*f==0 <=3 || *f >=20)  //the bug form Base Code, Need Fix
 	pspn = (1.f+G_OV)/6.f;
 
     w = img[*f].w;

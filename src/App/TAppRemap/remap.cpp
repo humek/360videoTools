@@ -104,12 +104,12 @@ int main(int argc, char **argv){
       t, a, argv[optind], argv[optind + 1], //inputFile and outputFile
       AngleX, AngleY, isInvRotMapping);
 
-    FILE *fp;
+    FILE *fp = NULL;
     std::map<int, std::vector<double>> rotKeyMap;
     if (rotFile != NULL)
     {
-      fp = fopen(rotFile, "r");
-      if (fp == 0)
+      fopen_s(&fp, rotFile, "r");
+      if (fp == NULL)
       {
         fprintf(stderr, "Error, can not open Rot File \n");
         return 0;

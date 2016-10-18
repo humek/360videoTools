@@ -55,12 +55,12 @@ int main(int argc, char **argv){
     sphcomparer sc;
     sc.init(i,o,f,m,n,z,b,v,w,swFlag,argv[optind],argv[optind+1],argv[optind+2], AngleX, AngleY);
 
-    FILE *fp;
+    FILE *fp = NULL;
     std::map<int, std::vector<double>> rotKeyMap;
     if (rotFile != NULL)
     {
-      fp = fopen(rotFile, "r");
-      if (fp == 0)
+      fopen_s(&fp, rotFile, "r");
+      if (fp == NULL)
       {
         fprintf(stderr, "Error, can not open Rot File \n");
         return 0;
