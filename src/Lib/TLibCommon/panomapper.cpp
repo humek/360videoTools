@@ -137,6 +137,8 @@ ifilter panomapper::charToInterpl(const char* f){
 	    return filter_linear;
 	else if(!strcmp(f,"bicubic"))
 	    return filter_bicubic;
+  else if (!strcmp(f, "lanczos"))
+    return filter_lanczos;
     }
     return filter_bicubic;
 }
@@ -274,7 +276,7 @@ z *         the type of interpolation
  */
 void remapper::init(const char* inp_map, const char* out_map, const char* interpl, const char* m, bool bf,
 		    int n, float x, float y, float w, float h, int z, const char* b, int v, float vp, float vt,
-        const char* t, const char* a, const char* inp, const char* out, double AngleX, double AngleY, int isInvRotMapping){
+        const char* t, const char* a, const char* inp, const char* out, double AngleX, double AngleY, double AngleZ, int isInvRotMapping){
 
     sph2src   = charToSph2Map (inp_map);
     dst2sph   = charToMap2Sph (out_map);
@@ -328,7 +330,7 @@ void remapper::init(const char* inp_map, const char* out_map, const char* interp
 	G_ACSFLAG = true;
 
     // file read writers
-    srcYuv.init(inp, srcWid, srcHgt, srcDim[0].p, multFlag, AngleX, AngleY, isInvRotMapping);
+    srcYuv.init(inp, srcWid, srcHgt, srcDim[0].p, multFlag, AngleX, AngleY, AngleZ, isInvRotMapping);
     dstYuv.init(out, dstDim.w, dstDim.h, dstDim.p);
 
     // deal with this later
@@ -347,7 +349,7 @@ void remapper::init(const char* inp_map, const char* out_map, const char* interp
 void remapper::remapFrames(std::map<int, std::vector<double>> rotMap, int isfirstFrameRot){
     int nf = 0;
 
-    double storeX, storeY;
+    double storeX, storeY, storeZ;
     while(nf < m_numFrames && srcYuv.readNextFrame()){
 	nf++;
 	printf("Frame: %d\r", nf); fflush(stdout);
@@ -356,26 +358,34 @@ void remapper::remapFrames(std::map<int, std::vector<double>> rotMap, int isfirs
   {
     storeX = srcYuv.getY()->AngleX;
     storeY = srcYuv.getY()->AngleY;
+    storeZ = srcYuv.getY()->AngleZ;
     srcYuv.getY()->AngleX = 0.0;
     srcYuv.getY()->AngleY = 0.0;
+    srcYuv.getY()->AngleZ = 0.0;
     srcYuv.getU()->AngleX = 0.0;
     srcYuv.getU()->AngleY = 0.0;
+    srcYuv.getU()->AngleZ = 0.0;
     srcYuv.getV()->AngleX = 0.0;
     srcYuv.getV()->AngleY = 0.0;
+    srcYuv.getV()->AngleZ = 0.0;
   }
   if (rotMap.size() != 0)
   {
     std::map<int, std::vector<double>>::iterator it = rotMap.find(nf - 1);
     storeX = srcYuv.getY()->AngleX;
     storeY = srcYuv.getY()->AngleY;
+    storeZ = srcYuv.getY()->AngleZ;
     if (it != rotMap.end())
     {
       srcYuv.getY()->AngleX = it->second[0];
       srcYuv.getY()->AngleY = it->second[1];
+      srcYuv.getY()->AngleZ = it->second[2];
       srcYuv.getU()->AngleX = it->second[0];
       srcYuv.getU()->AngleY = it->second[1];
+      srcYuv.getU()->AngleZ = it->second[2];
       srcYuv.getV()->AngleX = it->second[0];
       srcYuv.getV()->AngleY = it->second[1];
+      srcYuv.getV()->AngleZ = it->second[2];
     }
  
   }
@@ -393,19 +403,25 @@ void remapper::remapFrames(std::map<int, std::vector<double>> rotMap, int isfirs
   {
     srcYuv.getY()->AngleX = storeX;
     srcYuv.getY()->AngleY = storeY;
+    srcYuv.getY()->AngleZ = storeZ;
     srcYuv.getU()->AngleX = storeX;
     srcYuv.getU()->AngleY = storeY;
+    srcYuv.getU()->AngleZ = storeZ;
     srcYuv.getV()->AngleX = storeX;
     srcYuv.getV()->AngleY = storeY;
+    srcYuv.getV()->AngleZ = storeZ;
   }
   if (rotMap.size() != 0)
   {
     srcYuv.getY()->AngleX = storeX;
     srcYuv.getY()->AngleY = storeY;
+    srcYuv.getY()->AngleZ = storeZ;
     srcYuv.getU()->AngleX = storeX;
     srcYuv.getU()->AngleY = storeY;
+    srcYuv.getU()->AngleZ = storeZ;
     srcYuv.getV()->AngleX = storeX;
     srcYuv.getV()->AngleY = storeY;
+    srcYuv.getV()->AngleZ = storeZ;
   }
 	dstYuv.writeNextFrame();
 	if(G_ACSFLAG) 
@@ -572,7 +588,7 @@ void remapper::supersample(const image *src, const image *dst, const image *acs,
 	
         // Project and unproject giving the source location. Sample there.
         float v[3];
-        if (dst2sph(f, ii, jj, src, dst->h, dst->w, v) && sph2src(&F, &I, &J, src, v, 1)){
+        if (dst2sph(f, ii, jj, dst, dst->h, dst->w, v) && sph2src(&F, &I, &J, src, v, 1)){
           if (sph2src == sph2aitoff)
           {
             image* p = const_cast<image*>(src);
@@ -737,7 +753,7 @@ sphcomparer::~sphcomparer(){
  */
 void sphcomparer::init(const char* srcmap1, const char* srcmap2, const char* interpl,
 		       const char* m, const char* n, int z, const char* b, const char* v, const char* wght, bool swflag,
-		       const char* inp1, const char* inp2, const char* sph, double AngleX, double AngleY){
+		       const char* inp1, const char* inp2, const char* sph, double AngleX, double AngleY, double AngleZ, char* compareMatrix){
     sph2sr1   = charToSph2Map(srcmap1);
     sph2sr2   = charToSph2Map(srcmap2);
     fil       = charToInterpl(interpl);
@@ -769,8 +785,11 @@ void sphcomparer::init(const char* srcmap1, const char* srcmap2, const char* int
     // file read writers
     int invRotFlag = 1;
     sr1Yuv.init(inp1, sr1Wid, sr1Hgt, sr1Dim[0].p, multFlag1);
-    sr2Yuv.init(inp2, sr2Wid, sr2Hgt, sr2Dim[0].p, multFlag2, AngleX, AngleY, invRotFlag);
-    sphData = readSphData(sph);
+    sr2Yuv.init(inp2, sr2Wid, sr2Hgt, sr2Dim[0].p, multFlag2, AngleX, AngleY, AngleZ, invRotFlag);
+    if (!strcmp(compareMatrix, "spsnr"))
+    {
+      sphData = readSphData(sph);
+    }
 }
 
 /*
@@ -781,10 +800,10 @@ void sphcomparer::init(const char* srcmap1, const char* srcmap2, const char* int
  * Inputs: (none)
  * Return: (float) PSNR
  */
-double sphcomparer::sphcomp(std::map<int, std::vector<double>> rotMap, int isFirstFrameRot, bool mserFlag){
+double sphcomparer::sphcomp(std::map<int, std::vector<double>> rotMap, int isFirstFrameRot, char* compareMatrix, bool mserFlag){
     int nf = 0;
     float ps = 0;
-    double storeX, storeY;
+    double storeX, storeY, storeZ;
     while(nf<m_numFrames)
     {
 	      bool sr1Flag = sr1Yuv.readNextFrame();
@@ -803,48 +822,75 @@ double sphcomparer::sphcomp(std::map<int, std::vector<double>> rotMap, int isFir
         {
           storeX = sr2Yuv.getY()->AngleX;
           storeY = sr2Yuv.getY()->AngleY;
+          storeZ = sr2Yuv.getY()->AngleZ;
           sr2Yuv.getY()->AngleX = 0.0;
           sr2Yuv.getY()->AngleY = 0.0;
+          sr2Yuv.getY()->AngleZ = 0.0;
           sr2Yuv.getU()->AngleX = 0.0;
           sr2Yuv.getU()->AngleY = 0.0;
+          sr2Yuv.getU()->AngleZ = 0.0;
           sr2Yuv.getV()->AngleX = 0.0;
           sr2Yuv.getV()->AngleY = 0.0;
+          sr2Yuv.getV()->AngleZ = 0.0;
         }
         if (rotMap.size() != 0)
         {
           std::map<int, std::vector<double>>::iterator it = rotMap.find(nf - 1);
           storeX = sr2Yuv.getY()->AngleX;
           storeY = sr2Yuv.getY()->AngleY;
+          storeZ = sr2Yuv.getY()->AngleZ;
           if (it != rotMap.end())
           {
             sr2Yuv.getY()->AngleX = it->second[0];
             sr2Yuv.getY()->AngleY = it->second[1];
+            sr2Yuv.getY()->AngleZ = it->second[2];
             sr2Yuv.getU()->AngleX = it->second[0];
             sr2Yuv.getU()->AngleY = it->second[1];
+            sr2Yuv.getU()->AngleZ = it->second[2];
             sr2Yuv.getV()->AngleX = it->second[0];
             sr2Yuv.getV()->AngleY = it->second[1];
+            sr2Yuv.getV()->AngleZ = it->second[2];
           }
         }
-	      sph1 = genSphFromImg(sr1Yuv.getY(), sph2sr1);
-	      sph2 = genSphFromImg(sr2Yuv.getY(), sph2sr2);
-        ps += (float)compareTwoSph(sr2Yuv.getY(), mserFlag);
+        if (!strcmp(compareMatrix, "spsnr"))
+        {
+          sph1 = genSphFromImg(sr1Yuv.getY(), sph2sr1);
+          sph2 = genSphFromImg(sr2Yuv.getY(), sph2sr2);
+          ps += (float)compareTwoSph(sr2Yuv.getY(), mserFlag);
+        }
+        else if (!strcmp(compareMatrix, "wspsnr"))
+        {
+          ps += (float)compareWSpsnr(sr1Yuv.getY(), sr2Yuv.getY(), mserFlag);
+ 
+        }
+        else
+        {
+          fprintf(stderr, "compareMatrix must be spsnr or wspsnr");
+          exit(0);
+        }
         if (nf == 1 && isFirstFrameRot == 0)
         {
           sr2Yuv.getY()->AngleX = storeX;
           sr2Yuv.getY()->AngleY = storeY;
+          sr2Yuv.getY()->AngleZ = storeZ;
           sr2Yuv.getU()->AngleX = storeX;
           sr2Yuv.getU()->AngleY = storeY;
+          sr2Yuv.getU()->AngleZ = storeZ;
           sr2Yuv.getV()->AngleX = storeX;
           sr2Yuv.getV()->AngleY = storeY;
+          sr2Yuv.getV()->AngleZ = storeZ;
         }
         if (rotMap.size() != 0)
         {
           sr2Yuv.getY()->AngleX = storeX;
           sr2Yuv.getY()->AngleY = storeY;
+          sr2Yuv.getY()->AngleZ = storeZ;
           sr2Yuv.getU()->AngleX = storeX;
           sr2Yuv.getU()->AngleY = storeY;
+          sr2Yuv.getU()->AngleZ = storeZ;
           sr2Yuv.getV()->AngleX = storeX;
           sr2Yuv.getV()->AngleY = storeY;
+          sr2Yuv.getV()->AngleZ = storeZ;
         }
     }
     printf("nf: %d\n",nf);
@@ -976,6 +1022,49 @@ double sphcomparer::compareTwoSph(const image* src, bool mserFlag){
     double v = sph1[i].x - sph2[i].x;
     ssdR += 100000 * latWeight*v*v;
     totWeight += latWeight;
+  }
+  double mseR = ssdR / totWeight / 100000;
+  double psrR = 10 * log10(1.0f / mseR);
+
+  if (mserFlag)
+    return mseR;
+  return psrR;
+}
+
+double sphcomparer::compareWSpsnr(const image* src1, const image *src2, bool mserFlag)
+{
+  double ssdR = 0;
+  float latWeight = 1;
+  double totWeight = 0;
+  map2sph    sr1Tosph = NULL;
+  if (sph2sr1 == sph2rect && sph2sr2 == sph2rect)
+  {
+    sr1Tosph = rect2sph;
+  }
+  else
+  {
+    fprintf(stderr, "wspsnr need input and output format are all rect");
+  }
+  for (int i = 0; i < src1->h; i++)
+  {
+    for (int j = 0; j < src1->w; j++)
+    {
+      // find the color of the point (dependent on src)
+      const float ii = samp_pat->p[0].i + i;
+      const float jj = samp_pat->p[0].j + j;
+      int F;
+      float I, J;
+      float src2Value = 0.0f;
+      float *p = &src2Value;
+      float v[3];
+      sr1Tosph(0, ii, jj, src1, src1->h, src1->w, v);
+      sph2sr2(&F, &I, &J, src2, v, 1);
+      fil(src2 + F, NULL, I, J, p);
+      double dif = p[0] - src1->p[src1->w * i + j];
+      latWeight = cos((ii - src1->h / 2) * M_PI / src1->h);
+      ssdR += 100000 * latWeight * dif * dif;
+      totWeight += latWeight;
+    }
   }
   double mseR = ssdR / totWeight / 100000;
   double psrR = 10 * log10(1.0f / mseR);

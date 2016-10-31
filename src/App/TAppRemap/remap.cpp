@@ -30,10 +30,11 @@ static int usage(const char *exe){
       "\t-z ... Number of frames                                            [MAX]\n"
       "\t-c ... rotation of x                                                       [0]\n"
       "\t-d ... rotation of y                                                       [0]\n"
-      "\t-e ... file describe rotation                                         \n"
+      "\t-e ... rotation of z                                                       [0]\n"
+      "\t-k ... file describe rotation                                         \n"
       "\t-g ... is first frame rotate                                           [0]\n"
       "\t-u ... is inv rotate  mapping                                       [0]\n"
-      "\\E.g. (map.exe -i rect -o rect -m 2048 -b 4096 -n 1024 -v 2048 -z 10 InputFile.yuv OutputFile.yuv [-c 0.5 -d 1.0] [-e d:\\lowdelay_log.txt] [-g 1] [-u 1]) \n",
+      "\\E.g. (map.exe -i rect -o rect -m 2048 -b 4096 -n 1024 -v 2048 -z 10 InputFile.yuv OutputFile.yuv [-c 0.5 -d 1.0 -e 0.2] [-k d:\\lowdelay_log.txt] [-g 1] [-u 1]) \n",
             exe);
     return 0;
 }
@@ -51,6 +52,7 @@ int main(int argc, char **argv){
 
     double AngleX = 0.0;
     double AngleY = 0.0;
+    double AngleZ = 0.0;
     int isFirstFrameRot = 0;
     int isInvRotMapping = 0;
 
@@ -63,13 +65,13 @@ int main(int argc, char **argv){
     const char *m = NULL;
     const char *b = NULL;
 
-    while ((argNum = getopt(argc, argv, "i:o:m:n:z:t:x:y:w:h:f:a:b:v:p:l:c:d:e:g:u:r")) != -1)
+    while ((argNum = getopt(argc, argv, "i:o:m:n:z:t:x:y:w:h:f:a:b:v:p:l:c:d:e:k:g:u:r")) != -1)
     {
         switch (argNum){
               case 'i': inputType = optarg;                      break;                    //input file type
 	            case 'o': outputType = optarg;                      break;                 //output file type
               case 't': t = optarg;                      break;    // ???
-              case 'f': filter = optarg;                      break;                   //filter: linear, double linear, cubic
+              case 'f': filter = optarg;                      break;                   //filter: linear, double linear, cubic, lanczos
               case 'a': a = optarg;                      break;   //???
               case 'm': m = optarg;                      break;                //height of input, e. g. 2048
               case 'n': n = (int)strtol(optarg, 0, 0);   break;         //height of output e. g. 1024
@@ -84,7 +86,8 @@ int main(int argc, char **argv){
 	            case 'l': l = (float)strtol(optarg, 0, 0); break;                              //Viewport center position tht (degrees), only used in viewport
               case 'c': AngleX = (double)strtod(optarg, 0);                      break;     //about rotation
               case 'd': AngleY = (double)strtod(optarg, 0);                     break;
-              case 'e': rotFile = optarg;          break;
+              case 'e': AngleZ = (double)strtod(optarg, 0);                     break;
+              case 'k': rotFile = optarg;          break;
               case 'g': isFirstFrameRot = (int)strtol(optarg, 0, 0);          break;     //is first frame rotate, 0 for no, 1 for yep
               case 'u': isInvRotMapping = (int)strtol(optarg, 0, 0);          break;     //is inv rotate mapping, 0 for no, 1 for yep
 	            case 'r': blendFlag = true;                break;        //????
@@ -97,12 +100,16 @@ int main(int argc, char **argv){
     // mapping / yuv read write init
     remapper PanoMapper;
 
+    if (filter == NULL)
+    {
+      filter = "lanczos";
+    }
     PanoMapper.init(inputType, outputType, filter, m, blendFlag, n,
       x, y, w, h,     //view port use, not used
       FrameNum, b, v,   
       p, l,       //view port use
       t, a, argv[optind], argv[optind + 1], //inputFile and outputFile
-      AngleX, AngleY, isInvRotMapping);
+      AngleX, AngleY, AngleZ, isInvRotMapping);
 
     FILE *fp = NULL;
     std::map<int, std::vector<double>> rotKeyMap;
@@ -119,15 +126,18 @@ int main(int argc, char **argv){
         char Line[256];
         int flagx = 0;
         int flagy = 0;
+        int flagz = 0;
         int poc = 0;
         double rotx = 0.0;
         double roty = 0.0;
+        double rotz = 0.0;
         
         while (fgets(Line, sizeof(Line), fp))
         {
           std::string strLine(Line);
           size_t posX = strLine.find("currRotX");
           size_t posY = strLine.find("currRotY");
+          size_t posZ = strLine.find("currRotZ");
           size_t posPoc = strLine.rfind("POC");
           if (posX != std::string::npos)
           {
@@ -149,9 +159,19 @@ int main(int argc, char **argv){
             }
             else flagy = 1;
           }
+          if (posZ != std::string::npos)
+          {
+            if (flagz != 0)
+            {
+              std::string tmpStr = strLine.substr(posZ + 8, std::string::npos);
+              rotz = atof(tmpStr.c_str());
+              flagz = 0;
+            }
+            else flagz = 1;
+          }
           if (posPoc != std::string::npos)
           {
-            std::vector<double> vecTmp = { rotx, roty };
+            std::vector<double> vecTmp = { rotx, roty, rotz };
             poc = atoi(strLine.c_str() + 3);
             rotKeyMap.insert(std::map<int, std::vector<double>>::value_type(poc, vecTmp));
           }

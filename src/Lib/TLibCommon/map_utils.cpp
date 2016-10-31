@@ -267,16 +267,17 @@ int sph2rect(int* f, float* i, float* j, const image* img, const float* v, int b
     {
       double AngleX = -img->AngleX;
       double AngleY = -img->AngleY;
+      double AngleZ = -img->AngleZ;
 
-      double b11 = cos(AngleX);
-      double b12 = -sin(AngleY)*sin(AngleX);
-      double b13 = -cos(AngleY)*sin(AngleX);
-      double b21 = 0;
-      double b22 = cos(AngleY);
-      double b23 = -sin(AngleY);
-      double b31 = sin(AngleX);
-      double b32 = cos(AngleX)*sin(AngleY);
-      double b33 = cos(AngleY)*cos(AngleX);
+      double b11 = cos(AngleY) * cos(AngleZ);
+      double b12 = -sin(AngleX) * sin(AngleY) - cos(AngleX) * cos(AngleY) * sin(AngleZ);
+      double b13 = cos(AngleY) * sin(AngleX) * sin(AngleZ) - cos(AngleX) * sin(AngleY);
+      double b21 = sin(AngleZ);
+      double b22 = cos(AngleX) * cos(AngleZ);
+      double b23 = -cos(AngleZ) * sin(AngleX);
+      double b31 = cos(AngleZ) * sin(AngleY);
+      double b32 = cos(AngleY) * sin(AngleX) - cos(AngleX) * sin(AngleY) * sin(AngleZ);
+      double b33 = cos(AngleX) * cos(AngleY) + sin(AngleX) * sin(AngleY) * sin(AngleZ);
 
       double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
 
@@ -289,15 +290,16 @@ int sph2rect(int* f, float* i, float* j, const image* img, const float* v, int b
     {
       double AngleX = img->AngleX;
       double AngleY = img->AngleY;
-      double b11 = cos(AngleX);
-      double b12 = 0;
-      double b13 = -sin(AngleX);
-      double b21 = -sin(AngleY)*sin(AngleX);
-      double b22 = cos(AngleY);
-      double b23 = -cos(AngleX)*sin(AngleY);
-      double b31 = cos(AngleY)*sin(AngleX);
-      double b32 = sin(AngleY);
-      double b33 = cos(AngleY)*cos(AngleX);
+      double AngleZ = img->AngleZ;
+      double b11 = cos(AngleY) * cos(AngleZ);
+      double b12 = -sin(AngleZ);
+      double b13 = -cos(AngleZ) * sin(AngleY);
+      double b21 = cos(AngleX) * cos(AngleY) * sin(AngleZ) - sin(AngleX) * sin(AngleY);
+      double b22 = cos(AngleX) * cos(AngleZ);
+      double b23 = -cos(AngleY) * sin(AngleX) - cos(AngleX) * sin(AngleY) * sin(AngleZ);
+      double b31 = cos(AngleX) * sin(AngleY) + cos(AngleY) * sin(AngleX) * sin(AngleZ);
+      double b32 = cos(AngleZ) * sin(AngleX);
+      double b33 = cos(AngleX) * cos(AngleY) - sin(AngleX) * sin(AngleY) * sin(AngleZ);
 
       double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
 
@@ -328,16 +330,17 @@ int sph2sanson(int* f, float* i, float* j, const image* img, const float* v, int
   {
     double AngleX = -img->AngleX;
     double AngleY = -img->AngleY;
+    double AngleZ = -img->AngleZ;
 
-    double b11 = cos(AngleX);
-    double b12 = -sin(AngleY)*sin(AngleX);
-    double b13 = -cos(AngleY)*sin(AngleX);
-    double b21 = 0;
-    double b22 = cos(AngleY);
-    double b23 = -sin(AngleY);
-    double b31 = sin(AngleX);
-    double b32 = cos(AngleX)*sin(AngleY);
-    double b33 = cos(AngleY)*cos(AngleX);
+    double b11 = cos(AngleY) * cos(AngleZ);
+    double b12 = -sin(AngleX) * sin(AngleY) - cos(AngleX) * cos(AngleY) * sin(AngleZ);
+    double b13 = cos(AngleY) * sin(AngleX) * sin(AngleZ) - cos(AngleX) * sin(AngleY);
+    double b21 = sin(AngleZ);
+    double b22 = cos(AngleX) * cos(AngleZ);
+    double b23 = -cos(AngleZ) * sin(AngleX);
+    double b31 = cos(AngleZ) * sin(AngleY);
+    double b32 = cos(AngleY) * sin(AngleX) - cos(AngleX) * sin(AngleY) * sin(AngleZ);
+    double b33 = cos(AngleX) * cos(AngleY) + sin(AngleX) * sin(AngleY) * sin(AngleZ);
 
     double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
 
@@ -350,15 +353,16 @@ int sph2sanson(int* f, float* i, float* j, const image* img, const float* v, int
   {
     double AngleX = img->AngleX;
     double AngleY = img->AngleY;
-    double b11 = cos(AngleX);
-    double b12 = 0;
-    double b13 = -sin(AngleX);
-    double b21 = -sin(AngleY)*sin(AngleX);
-    double b22 = cos(AngleY);
-    double b23 = -cos(AngleX)*sin(AngleY);
-    double b31 = cos(AngleY)*sin(AngleX);
-    double b32 = sin(AngleY);
-    double b33 = cos(AngleY)*cos(AngleX);
+    double AngleZ = img->AngleZ;
+    double b11 = cos(AngleY) * cos(AngleZ);
+    double b12 = -sin(AngleZ);
+    double b13 = -cos(AngleZ) * sin(AngleY);
+    double b21 = cos(AngleX) * cos(AngleY) * sin(AngleZ) - sin(AngleX) * sin(AngleY);
+    double b22 = cos(AngleX) * cos(AngleZ);
+    double b23 = -cos(AngleY) * sin(AngleX) - cos(AngleX) * sin(AngleY) * sin(AngleZ);
+    double b31 = cos(AngleX) * sin(AngleY) + cos(AngleY) * sin(AngleX) * sin(AngleZ);
+    double b32 = cos(AngleZ) * sin(AngleX);
+    double b33 = cos(AngleX) * cos(AngleY) - sin(AngleX) * sin(AngleY) * sin(AngleZ);
 
     double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
 
@@ -398,16 +402,17 @@ int sph2aitoff(int* f, float* i, float* j, const image* img, const float* v, int
   {
     double AngleX = -img->AngleX;
     double AngleY = -img->AngleY;
+    double AngleZ = -img->AngleZ;
 
-    double b11 = cos(AngleX);
-    double b12 = -sin(AngleY)*sin(AngleX);
-    double b13 = -cos(AngleY)*sin(AngleX);
-    double b21 = 0;
-    double b22 = cos(AngleY);
-    double b23 = -sin(AngleY);
-    double b31 = sin(AngleX);
-    double b32 = cos(AngleX)*sin(AngleY);
-    double b33 = cos(AngleY)*cos(AngleX);
+    double b11 = cos(AngleY) * cos(AngleZ);
+    double b12 = -sin(AngleX) * sin(AngleY) - cos(AngleX) * cos(AngleY) * sin(AngleZ);
+    double b13 = cos(AngleY) * sin(AngleX) * sin(AngleZ) - cos(AngleX) * sin(AngleY);
+    double b21 = sin(AngleZ);
+    double b22 = cos(AngleX) * cos(AngleZ);
+    double b23 = -cos(AngleZ) * sin(AngleX);
+    double b31 = cos(AngleZ) * sin(AngleY);
+    double b32 = cos(AngleY) * sin(AngleX) - cos(AngleX) * sin(AngleY) * sin(AngleZ);
+    double b33 = cos(AngleX) * cos(AngleY) + sin(AngleX) * sin(AngleY) * sin(AngleZ);
 
     double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
 
@@ -420,15 +425,16 @@ int sph2aitoff(int* f, float* i, float* j, const image* img, const float* v, int
   {
     double AngleX = img->AngleX;
     double AngleY = img->AngleY;
-    double b11 = cos(AngleX);
-    double b12 = 0;
-    double b13 = -sin(AngleX);
-    double b21 = -sin(AngleY)*sin(AngleX);
-    double b22 = cos(AngleY);
-    double b23 = -cos(AngleX)*sin(AngleY);
-    double b31 = cos(AngleY)*sin(AngleX);
-    double b32 = sin(AngleY);
-    double b33 = cos(AngleY)*cos(AngleX);
+    double AngleZ = img->AngleZ;
+    double b11 = cos(AngleY) * cos(AngleZ);
+    double b12 = -sin(AngleZ);
+    double b13 = -cos(AngleZ) * sin(AngleY);
+    double b21 = cos(AngleX) * cos(AngleY) * sin(AngleZ) - sin(AngleX) * sin(AngleY);
+    double b22 = cos(AngleX) * cos(AngleZ);
+    double b23 = -cos(AngleY) * sin(AngleX) - cos(AngleX) * sin(AngleY) * sin(AngleZ);
+    double b31 = cos(AngleX) * sin(AngleY) + cos(AngleY) * sin(AngleX) * sin(AngleZ);
+    double b32 = cos(AngleZ) * sin(AngleX);
+    double b33 = cos(AngleX) * cos(AngleY) - sin(AngleX) * sin(AngleY) * sin(AngleZ);
 
     double MatrixR[9] = { b11, b12, b13, b21, b22, b23, b31, b32, b33 };
 
@@ -1528,5 +1534,68 @@ void filter_bicubic(const image *img, const image *acs, float i, float j, float 
 
     return;
 }
+
+double getLanczosFactor(double x, int lanczosSize) {
+  if (x >= lanczosSize)
+    return 0;
+  if (abs(x) < 1e-16)
+    return 1;
+  x *= M_PI;
+  return lanczosSize * sin(x) * sin(x / lanczosSize) / (x * x);
+}
+
+void filter_lanczos(const image *img, const image *acs, float i, float j, float *p){
+  // assume subpixel centroid of (0.5, 0.5) in src image
+  i -= 0.5; j -= 0.5;
+  int lanczosSize = img->chromaFlag ? 2 : 3;
+
+  // take care of borders by doing linear interpolation
+  double AitoffCheck = 0;
+  double SansonCheck = 0;
+  if (img->isSpatialFilterBound == 1)
+  {
+    AitoffCheck = pow(abs((j + 0.5 - img->w / 2)) + 2, 2.0) / pow(img->w / 2, 2.0) + pow(abs((i + 0.5 - img->h / 2)) + 2, 2.0) / pow(img->h / 2, 2.0);
+  }
+  if (img->isSpatialFilterBound == 2)
+  {
+    double tmpPhi = i > img->h / 2 ? PIBY2 - PI * (i + 2) / (img->w / 2) : PIBY2 - PI * (i - 2) / (img->w / 2);
+    double tmptheta = (abs(j - (img->w / 2)) + 2) / (img->w / 2 * cos(tmpPhi)) * PI;
+    SansonCheck = tmptheta;
+  }
+
+  if (AitoffCheck >= 1 || SansonCheck > PI)
+  {
+    filter_nearest(img, acs, i + 0.5f, j + 0.5f, p);
+    return;
+  }
+
+  const long iMin = lrintf(floorf(i)) - lanczosSize + 1; //row min(y)
+  const long iMax = lrintf(floorf(i)) + lanczosSize; //row max(y)
+
+  const long jMin = lrintf(floorf(j)) - lanczosSize + 1;  //col min(x)
+  const long jMax = lrintf(floorf(j)) + lanczosSize;  //col max(x)
+
+  if ((iMin < 0) || (iMax > img->h - 1) || (jMin < 0) || (jMax > img->w - 1)){
+    filter_linear(img, acs, i + 0.5f, j + 0.5f, p);
+    return;
+  }
+
+
+
+  double tmpValue = 0.0;
+  double totalweights = 0.0;
+  for (int row = iMin; row < iMax + 1; row++)
+  {
+    for (int col = jMin; col < jMax + 1; col++)
+    {
+      double weights = getLanczosFactor(j - col, lanczosSize) * getLanczosFactor(i - row, lanczosSize);
+      tmpValue += img->p[img->w*row + col] * weights;
+      totalweights += weights;
+    }
+  }
+  p[0] = clamp((float)tmpValue / totalweights, 0.0f, 1.0f);
+  return;
+}
+
 
 

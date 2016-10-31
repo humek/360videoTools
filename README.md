@@ -12,7 +12,7 @@ Need: openCV 3.1，工程中需要根据路径include
 ##TAppRemap: 
 ```
 TAppRemap.exe [-i input] [-o output] [-f filter] [-m input_height] [-b input_width] [-n output_height]
-[-v output_width] src dst  [-c rotx -d roty] [-e file.txt] [-g 1] [-u 1]
+[-v output_width] src dst  [-c rotx -d roty -e rotz] [-k file.txt] [-g 1] [-u 1]
 ```
 ```
  -i ... Input  file type, common: rect  eqar  cube                [rect]
@@ -23,7 +23,7 @@ of the top/down of rect) recttop_inv, rectdown_inv (used for inv)*
 
 -o ... Output file type: cube, rect, eqar, merc, view             [rect]
 
--f ... Filter type: nearest, linear, bicubic                   [bicubic]
+-f ... Filter type: nearest, linear, bicubic, lanczos         [mapping: lanczos, compare:bicubic]
 
 -m ... Input  height list                                          [500]
 
@@ -51,17 +51,35 @@ of the top/down of rect) recttop_inv, rectdown_inv (used for inv)*
 
 -z ... Number of frames                                            [MAX]
 
--c ... rotation of x(-pi--pi)                                        [0]
+-c ... rotation of x-axis(-pi--pi)                                        [0]
 
--d ... rotation of y(-pi--pi)                                        [0]
+-d ... rotation of y-axis(-pi--pi)                                        [0]
 
--e ... file describe rotation 
+-e ... rotation of z-axis(-pi--pi)                                        [0]
+
+-k ... file describe rotation 
 
 -g ... is first frame rotate                                           [0]
 
 -u ... is inv rotate  mapping                                       [0]
 ```
 
+ code中有两种坐标系，第一种是code base定义的
+            v[1](y)
+            ^
+            |  >v[2](z)
+            | /
+            |/---->v[0](x)
+            
+       第二种是旋转矩阵所对应的
+            Y(y)
+            ^
+            |  
+            | 
+            /---->Z(x)
+          /
+         X(-z)
+         
 ###Example:
 
 ###Remap:
@@ -86,12 +104,53 @@ TappRemap.exe -i poledown -o rectdown_inv -m 512 -b 512 -n 512 -v 4096 -z 10 pol
 ```
 
 ##TAppCompare: 
-支持不同投影方式、不同旋转角度的比较S-psnr或L-psnr
+支持不同投影方式、不同旋转角度的比较S-psnr或L-psnr或WS-PSNR
+
+```
+TAppCompare [-i input1] [-o input2] [-f filter] [-m m] [-n n] [-z z] [-w w] [-s] 
+[-c rotx -d roty -e rotz] [-k file.txt] [-g 1] [-q wspsnr] OrgFile RecFile sphere_655362.txt
+```
+```
+-i ... Input file type(Org File Type): cube, rect  eqarea, merc, dyad          [rect]
+
+-o ... Input file type(Rec File Type): cube, rect, eqarea, merc, dyad          [rect]
+
+           added: aitoff, sanson
+           
+-f ... Filter type: nearest, linear, bicubic                 [bicubic]
+
+-w ... Latitude weighting function                                 [1]
+
+-s ... Sphere weighting indicator                              [false]
+
+-c ... rotation of x                                               [0]
+
+-d ... rotation of y                                               [0]
+
+-e ... rotation of z                                               [0]
+
+-k ... file describe rotation                                         
+
+-g ... is first frame rotate                                      [0]
+
+-q ... compare Matrix:spsnr, wspsnr                              [spsnr]
+
+-m ... Src1 height                                               [500]
+
+-b ... Src1 width                                                 [2m]
+
+-n ... Src2 height                                               [500]
+
+-v ... Src1 width                                                 [2n]
+
+-z ... Num frames                                             [INTMAX]
+```
+
 
 ###Example:
 ```
 TAppCompare.exe -i rect -o rect -m 2048 -b 4096 -n 2048 -v 4096 -z 1 source1.yuv 
-source2.yuv -c 0.8 -d 1.0 sphere_655362.txt
+source2.yuv -c 0.8 -d 1.0 -e 0.6 -q wspsnr sphere_655362.txt
 ```
 ```
 TAppCompare.exe -i rect -o aitoff -m 2048 -b 4096 -n 2048 -v 4096 -z 1 source1.yuv source2.yuv sphere_655362.txt

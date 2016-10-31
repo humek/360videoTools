@@ -222,5 +222,5 @@ float aBlendBmul(const float *v);
 void filter_nearest(const image *img, const image *acs, float i, float j, float *p);
 void filter_linear( const image *img, const image *acs, float i, float j, float *p);
 void filter_bicubic(const image *img, const image *acs, float i, float j, float *p);
-
+void filter_lanczos(const image *img, const image *acs, float i, float j, float *p);
 #endif
