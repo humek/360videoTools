@@ -140,7 +140,7 @@ void cYuvReader::init(const char *fname, std::vector<int> ws, std::vector<int> h
     // alloc buffer for fread
     long lSize = n*(w*h + w*h/2);
     m_pBuffer = (uint8_t*) malloc (sizeof(uint8_t)*lSize);
-
+    m_pBuffer16 = (uint16_t*)malloc(sizeof(uint16_t)*lSize);
     // set image sizes
     setDimensions(m_pY,m_Ws,m_Hs,  1,pad);
     setDimensions(m_pU,m_Ws,m_Hs,0.5,pad);
@@ -167,14 +167,26 @@ void cYuvWriter::init(const char *fname, int w, int h, int n)
  * -----------------------------------------
  * Descrp: Wrapper to read frames from all sub files
  */
-bool cYuvReader::readNextFrame(){
+bool cYuvReader::readNextFrame(int inputBits){
     if (m_pFiles[0] == NULL) 
 	return false;
 
     // read next frame for each file
-    for(int i=0; i < nFiles; i++){
-	if(!readNextFrame(i))
-	    return false;
+    if (inputBits == 8)
+    {
+      for (int i = 0; i < nFiles; i++)
+      {
+        if (!readNextFrame_8(i))
+          return false;
+      }
+    }
+    else if (inputBits == 10)
+    {
+      for (int i = 0; i < nFiles; i++)
+      {
+        if (!readNextFrame_10(i))
+          return false;
+      }
     }
     return true;
 }
@@ -189,7 +201,7 @@ bool cYuvReader::readNextFrame(){
  *         (int)   num subimages (e.g., 6 in cube)
  * Return: (image*) Y image
  */
-bool cYuvReader::readNextFrame(int pID){
+bool cYuvReader::readNextFrame_8(int pID){
     // how many bytes do we need to read per file
     long wh    = m_Ws[pID]*m_Hs[pID];
     long lSize = wh + wh/2;
@@ -224,31 +236,109 @@ bool cYuvReader::readNextFrame(int pID){
     return true;
 }
 
+bool cYuvReader::readNextFrame_10(int pID){
+  // how many bytes do we need to read per file
+  long wh = m_Ws[pID] * m_Hs[pID];
+  long lSize = wh + wh / 2;
+  if (nFiles == 1)
+    lSize *= m_F;
+
+  // legacy
+  int m_W = m_Ws[0];
+  int m_H = m_Hs[0];
+
+  // read data into the buffer
+  size_t result = fread(m_pBuffer16, sizeof(uint16_t), (size_t)lSize, m_pFiles[pID]);
+  if (result != lSize)
+    return false;
+
+  // generate img from buffer data (assuming YUV420)    
+  if (nFiles > 1 || m_F == 1){
+    buffer2ImgMRQ10(m_pY[pID], m_pBuffer16, wh, 0);
+    buffer2ImgMRQ10(m_pU[pID], m_pBuffer16, wh / 4, wh);
+    buffer2ImgMRQ10(m_pV[pID], m_pBuffer16, wh / 4, wh + wh / 4);
+  }
+  if (m_F == 6 && nFiles == 1) {
+    buffer2Img10(m_pTmpY, m_pBuffer16, m_W, m_H, 0, m_F);
+    buffer2Img10(m_pTmpU, m_pBuffer16, m_W / 2, m_H / 2, m_W*m_H*m_F, m_F);
+    buffer2Img10(m_pTmpV, m_pBuffer16, m_W / 2, m_H / 2, (m_W*m_H + m_W*m_H / 4)*m_F, m_F);
+
+    cCubeHelper cubeHelper;
+    cubeHelper.image_border(m_pTmpY, m_pY);
+    cubeHelper.image_border(m_pTmpU, m_pU);
+    cubeHelper.image_border(m_pTmpV, m_pV);
+  }
+  return true;
+}
+
 /* writeNextFrame
  * ------------------------------------
  * Descrp: Writes yuv data to file in append mode
  */
-bool cYuvWriter::writeNextFrame(bool color)
+bool cYuvWriter::writeNextFrame(int outputBits, bool color)
 {
     if (m_pFiles[0] == NULL) return false;
-
+    int convertMulti = 255;
+    if (outputBits == 10)
+    {
+      convertMulti = 1024;
+    }
     if (color)
     {
         image *Y = getY();
         for (int f = 0; f < m_F; f++)
-          for (int i = 0; i<Y->w*Y->h; i++)
-            fprintf(m_pFiles[0], "%c", (unsigned int)(Y[f].p[i] * 255 + 0.499));
+        {
+          for (int i = 0; i < Y->w*Y->h; i++)
+          {
+            if (outputBits == 10)
+            {
+              uint16_t pixel = uint16_t(Y[f].p[i] * convertMulti + 0.499);
+              fwrite(&pixel, sizeof(uint16_t), 1, m_pFiles[0]);
+            }
+            else
+            {
+              fprintf(m_pFiles[0], "%c", (unsigned int)(Y[f].p[i] * convertMulti + 0.499));
+            }
+          }
+        }
+
+
 
 
           image *U = getU();
           for (int f = 0; f < m_F; f++)
-          for (int i = 0; i < U->w*U->h; i++)
-                fprintf(m_pFiles[0],"%c",(unsigned int)(U[f].p[i]*255 + 0.499));
+          {
+            for (int i = 0; i < U->w*U->h; i++)
+            {
+              if (outputBits == 10)
+              {
+                uint16_t pixel = uint16_t(U[f].p[i] * convertMulti + 0.499);
+                fwrite(&pixel, sizeof(uint16_t), 1, m_pFiles[0]);
+              }
+              else
+              {
+                fprintf(m_pFiles[0], "%c", (unsigned int)(U[f].p[i] * convertMulti + 0.499));
+              }
+            }
+          }
 
-        image *V = getV();
-        for(int f=0; f<m_F; f++)
-            for(int i=0; i<V->w*V->h; i++)
-                fprintf(m_pFiles[0],"%c",(unsigned int)(V[f].p[i]*255 + 0.499));
+
+          image *V = getV();
+          for (int f = 0; f < m_F; f++)
+          {
+            for (int i = 0; i < V->w*V->h; i++)
+            {
+              if (outputBits == 10)
+              {
+                uint16_t pixel = uint16_t(V[f].p[i] * convertMulti + 0.499);
+                fwrite(&pixel, sizeof(uint16_t), 1, m_pFiles[0]);
+              }
+              else
+              {
+                fprintf(m_pFiles[0], "%c", (unsigned int)(V[f].p[i] * convertMulti + 0.499));
+              }
+            }
+          }
     }
     else
     {
@@ -282,6 +372,12 @@ void cYuvReader::buffer2ImgMRQ(image& img, uint8_t* bufferIn, long nRead, long o
 	bufferOut[i] = 1/255.0f*(float)bufferIn[offset+i];
 }
 
+void cYuvReader::buffer2ImgMRQ10(image& img, uint16_t* bufferIn, long nRead, long offset){
+  float* bufferOut = img.p;
+  for (size_t i = 0; i < nRead; i++)
+    bufferOut[i] = 1 / 1024.0f*(float)bufferIn[offset + i];
+}
+
 /* buffer2Img
  * ----------------------------------
  * Descrp:
@@ -295,6 +391,14 @@ void cYuvReader::buffer2Img(image* img, uint8_t* bufferIn, int w, int h, int off
         for(size_t i=0; i < w*h; i++)
             bufferOut[i] =1/255.0f*(float)bufferIn[offset+f*w*h+i];
     }
+}
+void cYuvReader::buffer2Img10(image* img, uint16_t* bufferIn, int w, int h, int offset, int n)
+{
+  for (int f = 0; f < n; f++){
+    float* bufferOut = img[f].p;
+    for (size_t i = 0; i < w*h; i++)
+      bufferOut[i] = 1 / 1024.0f*(float)bufferIn[offset + f*w*h + i];
+  }
 }
 
 /*

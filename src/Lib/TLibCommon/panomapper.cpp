@@ -346,11 +346,11 @@ void remapper::init(const char* inp_map, const char* out_map, const char* interp
  * Inputs: (none)
  * Return: (none)
  */
-void remapper::remapFrames(std::map<int, std::vector<double>> rotMap, int isfirstFrameRot){
+void remapper::remapFrames(std::map<int, std::vector<double>> rotMap, int isfirstFrameRot, int inputBits, int outputBits){
     int nf = 0;
 
     double storeX, storeY, storeZ;
-    while(nf < m_numFrames && srcYuv.readNextFrame()){
+    while(nf < m_numFrames && srcYuv.readNextFrame(inputBits)){
 	nf++;
 	printf("Frame: %d\r", nf); fflush(stdout);
 
@@ -423,9 +423,9 @@ void remapper::remapFrames(std::map<int, std::vector<double>> rotMap, int isfirs
     srcYuv.getV()->AngleY = storeY;
     srcYuv.getV()->AngleZ = storeZ;
   }
-	dstYuv.writeNextFrame();
+	dstYuv.writeNextFrame(outputBits);
 	if(G_ACSFLAG) 
-	    acsYuv.writeNextFrame(false);
+	    acsYuv.writeNextFrame(outputBits, false);
     }
     printf("Total frames processed: %d\n", nf);
 }
@@ -800,14 +800,14 @@ void sphcomparer::init(const char* srcmap1, const char* srcmap2, const char* int
  * Inputs: (none)
  * Return: (float) PSNR
  */
-double sphcomparer::sphcomp(std::map<int, std::vector<double>> rotMap, int isFirstFrameRot, char* compareMatrix, bool mserFlag){
+double sphcomparer::sphcomp(std::map<int, std::vector<double>> rotMap, int isFirstFrameRot, char* compareMatrix, int src1Bits, int src2Bits, bool mserFlag){
     int nf = 0;
     float ps = 0;
     double storeX, storeY, storeZ;
     while(nf<m_numFrames)
     {
-	      bool sr1Flag = sr1Yuv.readNextFrame();
-	      bool sr2Flag = sr2Yuv.readNextFrame();
+      bool sr1Flag = sr1Yuv.readNextFrame(src1Bits);
+      bool sr2Flag = sr2Yuv.readNextFrame(src2Bits);
 	
 	      if (sr1Flag && !sr2Flag)
 	          fprintf(stderr,"Src1 file longer than src2");

@@ -64,7 +64,7 @@ class remapper: public panomapper{
     void  init(const char* inp_map, const char* out_map, const char* interpl,const char* m, bool bf,
 	      int n, float x, float y, float w, float h, int z, const char* b, int v, float vp, float vt,
         const char* t, const char* a, const char* inp, const char* out, double AngleX, double AngleY, double AngleZ, int isInvRotMapping);
-    void  remapFrames(std::map<int, std::vector<double>> rotMap, int isfirstFrameRot);
+    void  remapFrames(std::map<int, std::vector<double>> rotMap, int isfirstFrameRot, int inputBits, int outputBits);
     float antialiasFactorX();
     float antialiasFactorY();
     void  antialiasFilter();
@@ -103,7 +103,7 @@ class sphcomparer: public panomapper{
 	      const char* inp1, const char* inp2, const char* sph, double AngleX, double AngleY, double AngleZ, char *compareMatrix);
     float3* genSphFromImg(const image* src, sph2map sph2src);
     float3* readSphData(const char* fName);
-    double sphcomp(std::map<int, std::vector<double>> rotMap, int isFirstFrameRot, char* compareMatrix, bool mserFlag = false);
+    double sphcomp(std::map<int, std::vector<double>> rotMap, int isFirstFrameRot, char* compareMatrix, int inputBits, int outputBits, bool mserFlag = false);
     float getLatWeight(float3 sd);
     double compareTwoSph(const image* src, bool mserFlag = false);
     double compareWSpsnr(const image* src1, const image *src2, bool mserFlag = false);

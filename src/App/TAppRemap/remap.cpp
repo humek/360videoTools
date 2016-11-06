@@ -34,7 +34,8 @@ static int usage(const char *exe){
       "\t-k ... file describe rotation                                         \n"
       "\t-g ... is first frame rotate                                           [0]\n"
       "\t-u ... is inv rotate  mapping                                       [0]\n"
-      "\\E.g. (map.exe -i rect -o rect -m 2048 -b 4096 -n 1024 -v 2048 -z 10 InputFile.yuv OutputFile.yuv [-c 0.5 -d 1.0 -e 0.2] [-k d:\\lowdelay_log.txt] [-g 1] [-u 1]) \n",
+      "\t-j ... ColorFormat(bit)                                                [8-8]\n"
+      "\\E.g. (map.exe -i rect -o rect -m 2048 -b 4096 -n 1024 -v 2048 -z 10 InputFile.yuv OutputFile.yuv [-c 0.5 -d 1.0 -e 0.2] [-k d:\\lowdelay_log.txt] [-g 1] [-u 1][-j 10-8]) \n",
             exe);
     return 0;
 }
@@ -55,7 +56,9 @@ int main(int argc, char **argv){
     double AngleZ = 0.0;
     int isFirstFrameRot = 0;
     int isInvRotMapping = 0;
-
+    int inputBits = 8;
+    int outputBits = 8;
+    char* bits = NULL;
     const char *rotFile = NULL;
     const char *inputType = NULL;
     const char *outputType = NULL;
@@ -65,7 +68,7 @@ int main(int argc, char **argv){
     const char *m = NULL;
     const char *b = NULL;
 
-    while ((argNum = getopt(argc, argv, "i:o:m:n:z:t:x:y:w:h:f:a:b:v:p:l:c:d:e:k:g:u:r")) != -1)
+    while ((argNum = getopt(argc, argv, "i:o:m:n:z:t:x:y:w:h:f:a:b:v:p:l:c:d:e:k:j:g:u:r")) != -1)
     {
         switch (argNum){
               case 'i': inputType = optarg;                      break;                    //input file type
@@ -88,6 +91,7 @@ int main(int argc, char **argv){
               case 'd': AngleY = (double)strtod(optarg, 0);                     break;
               case 'e': AngleZ = (double)strtod(optarg, 0);                     break;
               case 'k': rotFile = optarg;          break;
+              case 'j': bits = optarg;          break;
               case 'g': isFirstFrameRot = (int)strtol(optarg, 0, 0);          break;     //is first frame rotate, 0 for no, 1 for yep
               case 'u': isInvRotMapping = (int)strtol(optarg, 0, 0);          break;     //is inv rotate mapping, 0 for no, 1 for yep
 	            case 'r': blendFlag = true;                break;        //????
@@ -104,6 +108,14 @@ int main(int argc, char **argv){
     {
       filter = "lanczos";
     }
+
+    char* tmpBits = NULL;
+    if (bits != NULL)
+    {
+      inputBits = atoi(strtok_s(bits, "-", &tmpBits));
+      outputBits = atoi(strtok_s(NULL, "-", &tmpBits));
+    }
+
     PanoMapper.init(inputType, outputType, filter, m, blendFlag, n,
       x, y, w, h,     //view port use, not used
       FrameNum, b, v,   
@@ -179,7 +191,7 @@ int main(int argc, char **argv){
       }
     }
 
-    PanoMapper.remapFrames(rotKeyMap, isFirstFrameRot);
+    PanoMapper.remapFrames(rotKeyMap, isFirstFrameRot, inputBits, outputBits);
 
     // map all frames
     return 0;

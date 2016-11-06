@@ -106,15 +106,18 @@ class cYuvReader: public cYuv
 {
 private:
     uint8_t *m_pBuffer;
+    uint16_t *m_pBuffer16;
     void buffer2Img(image* img, uint8_t* bufferIn, int w, int h, int offset, int n);
     void buffer2ImgMRQ(image& img, uint8_t* bufferIn, long nRead, long offset);
-
+    void buffer2ImgMRQ10(image& img, uint16_t* bufferIn, long nRead, long offset);
+    void buffer2Img10(image* img, uint16_t* bufferIn, int w, int h, int offset, int n);
 public:
-    cYuvReader()  { m_pBuffer = NULL; multFlag = false;};
-    ~cYuvReader() { if (m_pBuffer) free(m_pBuffer); };
+  cYuvReader()  { m_pBuffer = NULL; m_pBuffer16 = NULL, multFlag = false; };
+  ~cYuvReader() { if (m_pBuffer) free(m_pBuffer);  if (m_pBuffer16) free(m_pBuffer16); };
     void init(const char* fname, std::vector<int> ws, std::vector<int> hs, int n, bool mFlag, double AngleX = 0.0, double AngleY = 0.0, double AngleZ = 0.0, int invRotFlag = 0);
-    bool readNextFrame();
-    bool readNextFrame(int pID);
+    bool readNextFrame(int inputBits);
+    bool readNextFrame_8(int pID);
+    bool readNextFrame_10(int pID);
 };
 
 /* cYuvWriter
@@ -126,7 +129,7 @@ class cYuvWriter: public cYuv
 public:
     cYuvWriter() {multFlag=false;};
     void init(const char* fname, int w, int h, int n);
-    bool writeNextFrame(bool color=true);
+    bool writeNextFrame(int outputBits, bool color=true);
 };
 
 

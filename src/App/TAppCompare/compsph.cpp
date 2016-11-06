@@ -22,6 +22,7 @@ static int usage(const char *exe){
             "\t-b ... Src1 width                                                 [2m]\n"
             "\t-n ... Src2 height                                               [500]\n"
             "\t-v ... Src1 width                                                 [2n]\n"
+            "\t-j ... ColorFormat(bit)                                       [8-8]\n"
             "\t-z ... Num frames                                             [INTMAX]\n",
              exe);
     return 0;
@@ -34,11 +35,15 @@ int main(int argc, char **argv){
     double AngleX = 0;
     double AngleY = 0;
     double AngleZ = 0;
+    int src1Bits = 8;
+    int src2tBits = 8;
+    char* bits = NULL;
+
     const char *rotFile = NULL;
     int isFirstFrameRot = 0;
     char *compareMatrix = NULL;
     const char *i = NULL, *o=NULL, *f=NULL, *w=NULL, *m=NULL,*n=NULL, *b=NULL,*v=NULL;
-    while ((c = getopt(argc, argv, "i:o:c:d:e:k:g:q:m:n:w:f:z:spv:b:")) != -1){
+    while ((c = getopt(argc, argv, "i:o:c:d:e:k:g:q:j:m:n:w:f:z:spv:b:")) != -1){
 	switch (c){
 	case 'i': i        = optarg;                    break;
 	case 'o': o        = optarg;                    break;
@@ -50,6 +55,7 @@ int main(int argc, char **argv){
   case 'k': rotFile = optarg;          break;
   case 'g': isFirstFrameRot = (int)strtol(optarg, 0, 0);          break;     //is first frame roate, 0 for no, 1 for yep
   case 'q': compareMatrix = optarg;                    break;                        //wspsnr or spsnr
+  case 'j': bits = optarg;          break;
 	case 's': swFlag   = true;                      break;
 	case 'p': mserFlag = true;                      break;
 	case 'm': m        = optarg;                    break;
@@ -139,7 +145,14 @@ int main(int argc, char **argv){
       }
     }
 
-    double t = sc.sphcomp(rotKeyMap, isFirstFrameRot, compareMatrix, mserFlag);
+    char* tmpBits = NULL;
+    if (bits != NULL)
+    {
+      src1Bits = atoi(strtok_s(bits, "-", &tmpBits));
+      src2tBits = atoi(strtok_s(NULL, "-", &tmpBits));
+    }
+
+    double t = sc.sphcomp(rotKeyMap, isFirstFrameRot, compareMatrix, src1Bits, src2tBits, mserFlag);
     printf("PSNR: %.15f\n",t);
 
     return 0;
