@@ -32,6 +32,7 @@ static int usage(const char *exe){
       "\t-d ... rotation of y                                                       [0]\n"
       "\t-e ... rotation of z                                                       [0]\n"
       "\t-k ... file describe rotation                                         \n"
+      "\t-s ... skipFrameNum                                                  [0]\n"
       "\t-g ... is first frame rotate                                           [0]\n"
       "\t-u ... is inv rotate  mapping                                       [0]\n"
       "\t-j ... ColorFormat(bit)                                                [8-8]\n"
@@ -58,6 +59,7 @@ int main(int argc, char **argv){
     int isInvRotMapping = 0;
     int inputBits = 8;
     int outputBits = 8;
+    int skipFrameNum = 0;
     char* bits = NULL;
     const char *rotFile = NULL;
     const char *inputType = NULL;
@@ -68,7 +70,7 @@ int main(int argc, char **argv){
     const char *m = NULL;
     const char *b = NULL;
 
-    while ((argNum = getopt(argc, argv, "i:o:m:n:z:t:x:y:w:h:f:a:b:v:p:l:c:d:e:k:j:g:u:r")) != -1)
+    while ((argNum = getopt(argc, argv, "i:o:m:n:z:t:x:y:w:h:f:a:b:v:p:l:c:d:e:k:j:s:g:u:r")) != -1)
     {
         switch (argNum){
               case 'i': inputType = optarg;                      break;                    //input file type
@@ -91,7 +93,8 @@ int main(int argc, char **argv){
               case 'd': AngleY = (double)strtod(optarg, 0);                     break;
               case 'e': AngleZ = (double)strtod(optarg, 0);                     break;
               case 'k': rotFile = optarg;          break;
-              case 'j': bits = optarg;          break;
+              case 'j': bits = optarg;          break;                                                        //8-8 or 8-10 or 10-8 or 10-8
+              case 's': skipFrameNum = (int)strtol(optarg, 0, 0);            break;
               case 'g': isFirstFrameRot = (int)strtol(optarg, 0, 0);          break;     //is first frame rotate, 0 for no, 1 for yep
               case 'u': isInvRotMapping = (int)strtol(optarg, 0, 0);          break;     //is inv rotate mapping, 0 for no, 1 for yep
 	            case 'r': blendFlag = true;                break;        //????
@@ -191,7 +194,7 @@ int main(int argc, char **argv){
       }
     }
 
-    PanoMapper.remapFrames(rotKeyMap, isFirstFrameRot, inputBits, outputBits);
+    PanoMapper.remapFrames(rotKeyMap, isFirstFrameRot, inputBits, outputBits, skipFrameNum);
 
     // map all frames
     return 0;

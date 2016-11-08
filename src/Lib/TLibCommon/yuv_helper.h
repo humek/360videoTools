@@ -116,6 +116,7 @@ public:
   ~cYuvReader() { if (m_pBuffer) free(m_pBuffer);  if (m_pBuffer16) free(m_pBuffer16); };
     void init(const char* fname, std::vector<int> ws, std::vector<int> hs, int n, bool mFlag, double AngleX = 0.0, double AngleY = 0.0, double AngleZ = 0.0, int invRotFlag = 0);
     bool readNextFrame(int inputBits);
+    void skipSomeFrames(int inputBits, int skipFrameNum);
     bool readNextFrame_8(int pID);
     bool readNextFrame_10(int pID);
 };

@@ -12,7 +12,7 @@ Need: openCV 3.1，工程中需要根据路径include
 ##TAppRemap: 
 ```
 TAppRemap.exe [-i input] [-o output] [-f filter] [-m input_height] [-b input_width] [-n output_height]
-[-v output_width] src dst  [-c rotx -d roty -e rotz] [-k file.txt] [-g 1] [-u 1] [-j 10-8]
+[-v output_width] src dst  [-c rotx -d roty -e rotz] [-k file.txt] [-g 1] [-u 1] [-j 10-8] [-s 150]
 ```
 ```
  -i ... Input  file type, common: rect  eqar  cube                [rect]
@@ -64,6 +64,8 @@ of the top/down of rect) recttop_inv, rectdown_inv (used for inv)*
 -u ... is inv rotate  mapping                                       [0]
 
 -j ... ColorFormat(bits)                                             [8-8]
+
+-s ... skipFrameNum                                                 [0]
 ```
 
  code中有两种坐标系，第一种是code base定义的

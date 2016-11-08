@@ -64,7 +64,7 @@ class remapper: public panomapper{
     void  init(const char* inp_map, const char* out_map, const char* interpl,const char* m, bool bf,
 	      int n, float x, float y, float w, float h, int z, const char* b, int v, float vp, float vt,
         const char* t, const char* a, const char* inp, const char* out, double AngleX, double AngleY, double AngleZ, int isInvRotMapping);
-    void  remapFrames(std::map<int, std::vector<double>> rotMap, int isfirstFrameRot, int inputBits, int outputBits);
+    void  remapFrames(std::map<int, std::vector<double>> rotMap, int isfirstFrameRot, int inputBits, int outputBits, int skipFrameNum);
     float antialiasFactorX();
     float antialiasFactorY();
     void  antialiasFilter();

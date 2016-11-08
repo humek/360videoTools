@@ -346,10 +346,14 @@ void remapper::init(const char* inp_map, const char* out_map, const char* interp
  * Inputs: (none)
  * Return: (none)
  */
-void remapper::remapFrames(std::map<int, std::vector<double>> rotMap, int isfirstFrameRot, int inputBits, int outputBits){
+void remapper::remapFrames(std::map<int, std::vector<double>> rotMap, int isfirstFrameRot, int inputBits, int outputBits, int skipFrameNum){
     int nf = 0;
 
     double storeX, storeY, storeZ;
+    if (skipFrameNum != 0)
+    {
+      srcYuv.skipSomeFrames(inputBits, skipFrameNum);
+    }
     while(nf < m_numFrames && srcYuv.readNextFrame(inputBits)){
 	nf++;
 	printf("Frame: %d\r", nf); fflush(stdout);

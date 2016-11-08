@@ -191,6 +191,44 @@ bool cYuvReader::readNextFrame(int inputBits){
     return true;
 }
 
+void cYuvReader::skipSomeFrames(int inputBits, int skipFrameNum){
+  if (m_pFiles[0] == NULL)
+    return;
+
+  // read next frame for each file
+  if (inputBits == 8)
+  {
+    for (int i = 0; i < nFiles; i++)
+    {
+      long wh = m_Ws[i] * m_Hs[i];
+      long lSize = wh + wh / 2;
+      if (nFiles == 1)
+        lSize *= m_F;
+
+      fpos_t pos = skipFrameNum * sizeof(uint8_t) * (size_t)lSize;
+      
+      // skip data into the buffer
+      fsetpos(m_pFiles[i], &pos);
+    }
+  }
+  else if (inputBits == 10)
+  {
+    for (int i = 0; i < nFiles; i++)
+    {
+      long wh = m_Ws[i] * m_Hs[i];
+      long lSize = wh + wh / 2;
+      if (nFiles == 1)
+        lSize *= m_F;
+
+      fpos_t pos = skipFrameNum * sizeof(uint16_t)* (size_t)lSize;
+
+      // skip data into the buffer
+      fsetpos(m_pFiles[i], &pos);
+    }
+  }
+  return;
+}
+
 /* readNextFrame
  * ------------------------------------
  * Descrp: Reads an input YUV file and generates 3 images representing
